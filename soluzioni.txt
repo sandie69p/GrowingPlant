@@ -1,0 +1,18 @@
+RIF: [ID-PROBLEMA]
+Logica: Spiegazione discorsiva o pseudo-codice.
+Note Tecniche: Variabili chiave, formule matematiche da usare.
+---------------------------------------------------
+
+Esempio pratico:
+
+RIF: [P-001]
+Logica: Creare 3 classi separate (EnvironmentData, PlantData, PlantSpecies).
+EnvironmentData deve usare float per NPK e PH.
+PlantData deve avere variabili separate per i tipi di stress (Termico, Idrico).
+Note Tecniche: Usare [System.Serializable] sopra le classi.
+
+RIF: [P-002]
+Logica: Creare un Singleton TimeManager.
+Allo Start(), calcolare (DateTime.Now - LastSaveTime).
+Il risultato (DeltaTime) viene passato a un loop che simula X ore in un istante.
+Formula: OrePassate = (TickInterval * Multiplier) / 3600.

@@ -1,0 +1,14 @@
+[ID] [PRIORITÀ] [STATO] - Titolo del Problema
+Descrizione: Dettagli su cosa manca o cosa non funziona.
+---------------------------------------------------
+
+Esempio pratico (Basato su quello che abbiamo fatto):
+
+[P-001] [ALTA] [RISOLTO] - Definizione Strutture Dati Base
+Descrizione: Creare le classi per contenere i dati della Capsula e della Pianta. Devono essere serializzabili.
+
+[P-002] [ALTA] [APERTO] - Logica Gestione Tempo (TimeManager)
+Descrizione: Il gioco deve gestire il tempo reale e calcolare cosa succede quando l'app è chiusa (Offline Catch-up).
+
+[P-003] [MEDIA] [PENDING] - Inserimento Fase "Seme Dormiente"
+Descrizione: Implementare la logica per cui il seme non subisce danni finché l'utente non avvia la germinazione (come da GDD aggiornato).

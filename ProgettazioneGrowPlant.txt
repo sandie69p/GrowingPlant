@@ -1,0 +1,121 @@
+Questo è il file che spiega il gioco nella sua interezza:
+Game Design Document diviso in fasi:
+1. Core Concept e visione:
+    - Ruolo del Giocare: Bio-Tecnico / Supervisore di laboratorio;
+    - L'Attore (Il Sistema): La Capsula (Isolata), La Pianta (organismo);
+    - Filosofia: Il giocatore non "Coltiva" direttamente la pianta ma inceve il giocatore gestisce le variabili che permettono alla vita;
+2. Mappatura delle interazioni (User & System):
+    A. Azioni Dell'utente (Azioni Attive / Pratiche)
+        → Regolazione climatica:
+            ø Azione:
+                - Impostazione set-point Termostato (es. target 24°C);
+                - Impostazione set-point Umidostato (es. target 60%);
+        → Gestione Illuminazione:
+            ø Azione:
+                - Modifica Spettro (Slider RGB/UV);
+                - Posizionamento Fonte (Cordinate X/Y/Z della lampada su un binario motorizzato con possibile automazione, tipo macchinetta delle giostre quella per prendere i pupazzi);
+        → Input Chimico (Dosaggio):
+            ø Azione:
+                - Iniezione Soluzione Nutriente (Nitrogen, Potassium, Phosporus); // Da definire bene questa parte perché soggetta a modifiche
+                - Iniezione Bio-Stimolanti (Sperimentale);
+        → Pianificazione (End Game):
+            ø Azione:
+                - Creazione di routine controllo manuale non richiesto necessariamente;
+    B. Risposte del sistema:
+        → Feedback Immediato (Haptic/Visual):
+            ø Risposta:
+                - Rumore ventole, accensione luci, cambio colore led (rgba), condensa sul vetro (glassmorfism, texture) > in base a Temperatura Interna > Temperatura esterna;
+                - Aggiornamento grafici in tempo reale sulla Dashboard;
+        → Feedback biologico:
+            ø Risposta:
+                - (Morfogenesi): La pianta orienta le foglie verso la luce (Fototropismo);
+                - (Turgore): Le foglie si afflosciano se VWC < 10%;
+                - (Cromatica): Le foglie cambiano cromatura e colore esempio giallo (clorosi) se Azoto < Soglia;
+3. Logica Indipendente (Motore logico non visibile):
+    A. Cicli Ambientali Autonomi
+        - Ciclo Idrologico:
+            → Evaporazione dal suolo;
+            → Saturazione Aria;
+            → Condensazione sulle pareti;
+            → Precipitazione (Gocciolamento);
+            → Ritorno al suolo;
+        - Termodinamica:
+            → Dispersione termica verso l'esterno (se spento) o accumulo calore (effetto serra se acceso);
+    B. Cicli Biologici Autonomi:
+        - Sviluppo procedurale:
+            → Se Energia > CostoCreazioneNodo, il sistema genera una nuova mesh (Foglia o Ramo) usando algoritmi L-System;
+            - Sviluppo Design:
+                → La forma non è pre-renderizzata, è calcolata in base allo storico delle ultime 24h (Poca luce == Internodi lunghi);
+    C. Entropia e Imprevisti (Fattore Caos):
+        - Guesti Hardware:
+            → La pompa si blocca (Richiede intervento utente);
+        - Patogeni:
+            → Spore, Muffe si attivano se Umidità > 90% per x tempo;
+4. Obbiettivi e Progressione (Game Loop):
+    ¶ Fase 1: Survival (Short Term Game):
+        - Obiettivo:
+            → Mantenere i valori nella "Zona Verde" (Pianta in salute) [Omeostasi];
+        - Risultato:
+            → La pianta non muore. L'utente impara a leggere i segnali visivi (foglie gialle, punte secche...)
+    ¶ Fase 2: Ottimizzazione e Fioritura / Crescita (Mid term game):
+        - Obbiettivo:
+            → Introdurre la fioritura manipolando il fotoperiodo (es. simulare l'autunno accorciando le ore di luce);
+        - Risultato:
+            → Produzione del Fiore (Unico e procedurale);
+        - Reward:
+            → "Dati Ricerca" (Valuta di gioco) generati dal completamento del ciclo vitale;
+    ¶ Fase 3: Espansione e Automazione (Long Term Game):
+        - Obbiettivo:
+            → Creare il "Ciclo Perfetto" autosufficiente tramite programmazione dei timer;
+        - Azione:
+            → Acquisto di nuovi slot Capsula con i dati ricerca guadagnati, Acquisto di nuovi strumenti (Fattore efficienza strumenti);
+        - Risultato:
+            → Gestione di un intero laboratorio con piante multiple (Biomi diversi, Piante diverse, Genomi diversi);
+        - Endgame:
+            → Ibridazione (Incrocio piante per creare specie nuove);
+5. Struttura Dati (High Level):
+    Come il sistema "pensa" ai dati:
+        Entità                  Responsabilità                  Dati chiave
+
+        Environment             Gestisce la fisica              Temperatura, Umidità, CO2,
+        Controller              della stanza                    Livello Acqua
+
+        Plant Model             Gestisce la vita                Salute, Stess, DNA (Regole
+                                                                Crescita), Biomassa
+
+        Automation System       Sostituisce il giocatore        Script logici (IF this
+                                                                THEN that)
+
+        Time Manager            Gestisce il flusso temporale    Timestamp, DeltaTime,
+                                                                Calcolo Offline
+
+6. Fase Preliminare: Selezione Genomica (Pre-Game Setup):
+    A. Il Catalogo Semi (Database Statico):
+        - Attore:
+            → Utente;
+        - Interfaccia:
+            → "La banca dei semi": (UI Olografica o schedario);
+        - Azione:
+            → L'utente scorre le schede tecniche delle specie disponibili;
+            -- Esempio scheda:
+                ø Nome:
+                    → Helianthus Annuus (Girasole);
+                ø Difficoltà:
+                    → Bassa;
+                ø Tratto Speciale:
+                    → // Troppo generico, una pianta non ha sostanzialmente una caratteristica speciale, esempio il girasole ha bisogno di tanta luce, semplicemente cambia la costante attribbuto della pianta
+                ø Requisiti essenziali:
+                    → // Non è un requisito essenziale in gergo scientifico, sostanzialmente il freddo ha un pressure_stress maggiore di altri aspetti, quindi ha un peso ogni fattore pianta.
+    B. Input e Conferma:
+        - Azione utente:
+            → Seleziona "Pianta Girasole";
+        - Elaborazione Sistema (Backend):
+            → Il sistema carica il Template del Girasole (Dati di sola lettura);
+            → Il sistema istanzia un nuovo oggetto PlantData (Dati scrivibili/dinamici);
+            ø Data Injection: Copia i valori base dal Template alla nuova istanza:
+                - MaxHealth del template:
+                    → diventa CurrentHealth della pianta // Non sono sicuro che sia corretto dare una vita alla pianta, normalmente come si definisce la salute di una pianta?
+                - GrowthRate del Template:
+                    → Diventa il moltiplicatore della simulazione // premesso che la simulazione deve essere in real time non posso usare un growrate che influisce sul tempo perché deve rispettare il tempo, quindi influisce anche sulla velocità dei grafici;
+                - L-System Rules (Regole geometriche):
+                    → Vengono caricati i valori nella grafica;
