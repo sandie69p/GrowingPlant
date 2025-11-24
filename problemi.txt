@@ -1,14 +1,105 @@
-[ID] [PRIORITÀ] [STATO] - Titolo del Problema
+[ID] [PRIORITÀ] [STATO] [NOME UTENTE PRENOTAZIONE]- Titolo del Problema
 Descrizione: Dettagli su cosa manca o cosa non funziona.
----------------------------------------------------
+----------------------------------------------------------------------------------
 
-Esempio pratico (Basato su quello che abbiamo fatto):
+[P-DESIGN-001] [ALTA] [APERTO] - Concetto di "Salute" (HP) Inadatto
+    - Descrizione:
+        → Nel GDD e nel codice attuale si parla di "Health" o "MaxHealth" come in un gioco RPG. Le piante non hanno "punti vita".
+    - Fonte:
+        → Commento utente su "Data Injection".
+    - Impatto:
+        → Riduce il realismo. Non è chiaro quando la pianta muore.
 
-[P-001] [ALTA] [RISOLTO] - Definizione Strutture Dati Base
-Descrizione: Creare le classi per contenere i dati della Capsula e della Pianta. Devono essere serializzabili.
+----------------------------------------------------------------------------------
 
-[P-002] [ALTA] [APERTO] - Logica Gestione Tempo (TimeManager)
-Descrizione: Il gioco deve gestire il tempo reale e calcolare cosa succede quando l'app è chiusa (Offline Catch-up).
+[P-DESIGN-002] [ALTA] [APERTO] - Conflitto GrowthRate vs Tempo Reale
+    - Descrizione:
+        → Non si può usare un moltiplicatore di velocità (GrowthRate) per differenziare le piante, perché il tempo deve scorrere uguale per tutti (1 sec = 1 sec).
+    - Fonte:
+        → Commento utente su "Sviluppo Design".
+    - Impatto:
+        → Se acceleriamo il tempo per una pianta, disallineiamo i grafici e la simulazione fisica.
 
-[P-003] [MEDIA] [PENDING] - Inserimento Fase "Seme Dormiente"
-Descrizione: Implementare la logica per cui il seme non subisce danni finché l'utente non avvia la germinazione (come da GDD aggiornato).
+----------------------------------------------------------------------------------
+
+[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti"
+    - Descrizione:
+        → I termini attuali sono troppo "arcade". Dire che una pianta ha "Requisito: Caldo" o "Abilità: Resistenza" è vago matematicamente.
+    - Fonte:
+        → Commento utente su "Tratto Speciale".
+    - Impatto:
+        → Difficile programmare la differenza tra un Cactus e una Felce senza numeri precisi.
+
+----------------------------------------------------------------------------------
+
+[P-DESIGN-004] [ALTA] [APERTO] - Disallineamento Iniziale (Hardcore Mode)
+    - Descrizione:
+        → Se il giocatore inizia una partita "Hardcore" con parametri ambientali sbagliati (es. stanza fredda), la pianta (seme) subisce danni immediati appena istanziata, morendo prima che il giocatore possa toccare i controlli.
+    - Fonte:
+        → Commento utente su "Configurazione Automatica".
+    - Impatto:
+        → Frustrazione del giocatore, game over immediato ingiusto.
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-001] [ALTA] [APERTO] - Paradosso Termico del Sistema Chiuso:
+    - Falla:
+        → La capsula è definita "isolata" o "chiusa", ma l'utente continua ad iniettare energia (Luce / Riscaldamento). In un Sistema veramente isolato, il calore non ha dove andare se non  c'è uno scambiatore attivo (radiatore / condizionatore);
+    - Problema: (Conseguenze)
+        → Se la temperatura esterna è 20°C e accendo una lampada LED potente dentro una scatola di vetro chiusa, la temperatura interna salirà all'infinito (effetto serra) fino a cuocere la pianta, a meno che la "Dispersione Termica" citata non sia calcolata su una superfice radiante specifica. Attualmente il modello termodinamico sembra mancare del fattore "Dissipazione Attiva".
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-002] [ALTA] [APERTO] - Accumulo di Massa e Saturazione:
+    - Falla:
+        → L'utente inietta "Nutrienti" e "Acqua" (Massa in entrata), la pianta cresce (Massa solida).
+    - Problema:
+        → In una capsula sigillata di volume finito, se continuo ad aggiungere acqua e nutrienti senza mai togliere nulla (es. potatura, drenaggio scarti), la capsula si riempirà fisicamente fino a scoppiare o affogare tutto. Manca la logica di gestione dei rifiuti o del drenaggio dell'eccesso. Dove va a finire l'acqua che non viene assorbita?
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-003] [ALTA] [APERTO] - Il "Root Bound" (Saturazione Radicale):
+    - Falla:
+        → La progettazione prevede la crescita delle radici (RootMass), am non considera il volume del vaso / terreno;
+    - Problema:
+        → In un microambiente, le radici toccano le pareti molto presto ("Root Bound"). Nella realtà, quando questo accade, la pianta smette di crescere, si stressa e muore per soffocamento radicale. Nel gioco attuale, sembra che la pianta possa crescere all'infinito nello stesso slot, il che è biologicamente impossibile per il "Long Term Game" (Fase 3);
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-004] [ALTA] [APERTO] - Assenza del Microbioma (Il Ciclo Spezzato):
+    - Falla:
+        → Si parla di foglie che cadono o muoiono. In un ambiente "sterile" da laboratorio (senza batteri, funghi o insetti decompositori), una foglia morta non si decompone, semplicemente si secca e resta li;
+    - Problema:
+        → Senza Decomposizione, i nutrienti bloccati nella foglia morta non tornano nel terreno. Il ciclo dei nutrienti è aperto, non chiuso. L'utente sarà costretto a comprare fertilizzante all'infinito perché la materia organica morta diventa solo "spazzatura" che ingombra la visuale e non risorsa.
+
+[P-LOGIC-005] [MEDIA] [APERTO] - Riproduzione in Isolamento:
+    - Falla:
+        → Nella fase 2&3 si parla di "Fioritura" e "Ibridazione";
+    - Problema:
+        → Chi Impollina il fiore? In una capsula chiusa non c'è vento e non ci sono api. Se la pianta non è auto-impollinante (e molte non lo sono), il ciclo vitale si ferma al fiore che appassisce senza fare i semi. Manca la meccanica dell'impollinazione (Manuale o robotica);
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-006] [ALTA] [APERTO] - Il Paradosso dell'Osservazione Notturna:
+    - Falla:
+        → La pianta ha bisogno di buio assoluto per la respirazione notturna (fotoperiodo);
+    - Problema:
+        → Se il giocatore può giocare solo la sera (es. dopo lavoro), troverà la capsula al buio. Se accende la luce (o la luce del telefono / App) per vedere la pianta e "giocare", interrompe il ciclo di sonno della pianta, stressandola o bloccando la fioritura. Il gioco punisce il giocatore per il solo fatto di voler guardare la pianta nell'orario sbagliato.
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-007] [BASSA] [APERTO] - La Noia dell'Automazione (EndGame):
+    - Falla:
+        → L'obbiettivo della fase 3 è "Creare il Ciclo Perfetto autosufficiente";
+    - Problema:
+        → Se il giocatore ha successo e crea il ciclo perfetto, il gioco si gioca da solo. Non c'è più nessun imput richiesto dall'utente. Il successo porta alla "Morte del gameplay" (Il giocatore) viene esempio punito per il solo fatto di voler guardare la pianta nell'orario sbagliato;
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-008] [ALTA] [APERTO] - Salinizzazione del Terreno:
+    - Falla:
+        → L'utente inietta soluzioni nutrienti (Sali Minerali). L'acqua evapora, ma i sali restano.
+    - Problema:
+        → In agricoltura chiusa, questo porta rapidamente alla Salinizzazione tossica del substrato (Ec/Conducibilità elettrica alle stelle). Senza una meccanica di "Flush" (lavaggio del terreno con acqua pura e drenaggio), la pianta morirà per tossicità da sali dopo poche settimane di gioco, indipendentemente dalla bravura del giocatore;
+
+----------------------------------------------------------------------------------
