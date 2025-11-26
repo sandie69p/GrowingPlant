@@ -1,0 +1,73 @@
+DOCUMENTAZIONE STRUTTURA ASSETS (Unity Project Architecture)
+Progetto: BIO-CAPSULE
+Stato: Pre-Alpha
+----------------------------------------------------------------------------------
+
+ROOT (Assets/)
+├── _Scenes/                    # Le scene di gioco
+│   ├── MainMenu.unity          # Selezione Seme / Banca Dati
+│   └── LabSimulation.unity     # La scena principale (Capsula 3D)
+│
+├── Art/                        # Tutto ciò che è puramente visivo
+[cite_start]│   ├── Materials/              # Materiali (URP) [cite: 60]
+│   │   ├── Mat_Glass_Capsule   # Vetro con Shader condensa
+│   │   ├── Mat_Soil_Dynamic    # Terreno che cambia colore se bagnato
+│   │   └── Mat_Leaf_SSS        # Foglie con Subsurface Scattering
+│   │
+[cite_start]│   ├── Models/                 # Mesh 3D (.fbx / .obj) [cite: 60]
+[cite_start]│   │   ├── Capsule_Rig         # Il modello della stanza/capsula [cite: 61]
+│   │   └── Plant_Primitives/   # Cilindri e Piani base per la generazione procedurale
+│   │
+[cite_start]│   ├── Shaders/                # Shader Graph Files [cite: 61]
+│   │   ├── Shader_Condensation # Logica sfocatura/gocce
+│   │   └── Shader_PlantCell    # Logica clorofilla/stress visivo
+│   │
+[cite_start]│   └── Textures/               # Immagini 2D [cite: 61]
+│       ├── UI_Icons/           # Icone semi, icone avvisi, icone nutrienti
+│       └── PBR_Maps/           # Normal maps, Roughness maps per i materiali
+│
+[cite_start]├── Prefabs/                    # Oggetti di gioco pre-assemblati [cite: 62]
+[cite_start]│   ├── UI/                     # Widget dell'interfaccia [cite: 62]
+│   │   ├── Widget_Graph        # Grafico andamento dati
+│   │   └── Panel_Control       # Slider e manopole
+│   │
+│   └── Simulation/
+│       ├── Capsula_System      # L'intero macchinario (Luci + Ventole + Vetro)
+│       └── Plant_Container     # L'oggetto radice che conterrà la pianta procedurale
+│
+[cite_start]├── Resources/                  # Cartelle speciali per caricamento dinamico (LoadAsync) [cite: 63]
+│   └── SpeciesData/            # Qui vivono gli ScriptableObjects (I "Semi")
+│       ├── Girasole.asset
+│       ├── Felce.asset
+│       └── ...
+│
+[cite_start]└── Scripts/                    # Il Codice Sorgente (C#) [cite: 64]
+    │
+    [cite_start]├── Core/                   # I Manager Globali (Singleton) [cite: 64]
+    │   ├── GameManager.cs      # Gestione stati (Start, Pause, Quit)
+    │   ├── TimeManager.cs      # Gestione Tempo Reale e Offline Catch-up
+    │   └── SaveSystem.cs       # Gestione Serializzazione JSON
+    │
+    [cite_start]├── Data/                   # Classi Dati Pure (No MonoBehaviour) [cite: 65]
+    │   ├── EnvironmentData.cs  # [Serializable] Dati Capsula (Temp, NPK, pH)
+    │   ├── PlantData.cs        # [Serializable] Dati Pianta (Vigor, Energy, Nodes)
+    │   ├── PlantSpecies.cs     # [ScriptableObject] Template statico della specie
+    │   └── GameConfig.cs       # [Static] Costanti universali e formule bilanciamento
+    │
+    [cite_start]├── Controllers/            # Logica Fisica (Interazione col mondo) [cite: 66]
+    [cite_start]│   ├── EnvironmentCtrl.cs  # Applica i dati ai modelli (es. accende luce, muove ventole) [cite: 67]
+    │   ├── PlantController.cs  # Cervello della pianta (gestisce input/output risorse)
+    │   └── WasteManager.cs     # Gestione Serbatoio Scarti e Flush [P-LOGIC-002]
+    │
+    [cite_start]├── Logic/                  # Motore di Simulazione (Matematica pura) [cite: 68]
+    │   ├── MetabolismLogic.cs  # Calcoli Fotosintesi e Respirazione
+    [cite_start]│   ├── ClimateLogic.cs     # Calcoli Termodinamica e VPD [cite: 68]
+    │   └── ChemistryLogic.cs   # Calcoli pH e Antagonismo Nutrienti [P-LOGIC-013]
+    │
+    [cite_start]├── Procedural/             # Generazione Grafica (L-Systems) [cite: 69]
+    │   ├── LSystemGenerator.cs # Traduce le stringhe in geometria
+    │   └── MeshBuilder.cs      # Crea i poligoni in runtime
+    │
+    [cite_start]└── UI/                     # Interfaccia Utente [cite: 69]
+        ├── DashboardView.cs    # Aggiorna i testi e i grafici a schermo
+        └── InteractionView.cs  # Gestisce i click su slider e bottoni

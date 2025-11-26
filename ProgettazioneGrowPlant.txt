@@ -1,135 +1,121 @@
-Questo è il file che spiega il gioco nella sua interezza:
-Game Design Document diviso in fasi:
+Game Design Document - BIO-CAPSULE
+Stato: Integrato con Architettura Unity e Issue Tracking
+
 1. Core Concept e visione:
-    - Ruolo del Giocare: Bio-Tecnico / Supervisore di laboratorio;
-    - L'Attore (Il Sistema): La Capsula (Isolata), La Pianta (organismo);
-    - Filosofia: Il giocatore non "Coltiva" direttamente la pianta ma inceve il giocatore gestisce le variabili che permettono alla vita;
+    - Ruolo del Giocare: Bio-Tecnico / Supervisore di laboratorio.
+    - L'Attore (Il Sistema): La Capsula (Isolata), La Pianta (organismo).
+    - Filosofia: Il giocatore non "Coltiva" direttamente la pianta ma gestisce le variabili che permettono la vita.
+    - Script Core: [Ref: Assets/Scripts/Core/GameManager.cs]
+
 2. Mappatura delle interazioni (User & System):
-    A. Azioni Dell'utente (Azioni Attive / Pratiche)
-        → Regolazione climatica:
+    A. Azioni Dell'utente (Input):
+        → Regolazione climatica [Ref: Assets/Scripts/Controllers/EnvironmentCtrl.cs]:
             ø Azione:
                 - Impostazione set-point Termostato (es. target 24°C);
-                - Impostazione set-point Umidostato (es. target 60%);
+                - Impostazione set-point Umidostato (es. target 60%).
+            [⚠️ WARNING: Vedi P-LOGIC-001 Paradosso Termico]
+
         → Gestione Illuminazione:
             ø Azione:
                 - Modifica Spettro (Slider RGB/UV);
-                - Posizionamento Fonte (Cordinate X/Y/Z della lampada su un binario motorizzato con possibile automazione, tipo macchinetta delle giostre quella per prendere i pupazzi);
-        → Input Chimico (Dosaggio):
+                - Posizionamento Fonte (Coordinate X/Y/Z lampada).
+
+        → Input Chimico e Biologico (Dosaggio) [Ref: Assets/Scripts/Controllers/PlantController.cs]:
             ø Azione:
-                - Iniezione Soluzione Nutriente (Nitrogen, Potassium, Phosporus); // Da definire bene questa parte perché soggetta a modifiche
-                - Iniezione Bio-Stimolanti (Sperimentale);
+                - Iniezione Soluzione Nutriente (NPK);
+                - Iniezione Microbioma (Nanobatteri specifici, es. Decompositori);
+                - Iniezione Acqua Pura (Flush).
+            [⚠️ WARNING: Vedi P-LOGIC-010 Antagonismo Nutrienti]
+            [⚠️ WARNING: Vedi P-LOGIC-013 Deriva pH]
+
+        → Gestione Rifiuti & Manutenzione [Ref: Assets/Scripts/Controllers/WasteManager.cs]:
+            ø Azione:
+                - Svuotamento Serbatoio Scarti (Waste Tank);
+                - Attivazione Drenaggio Manuale (Emergenza).
+
         → Pianificazione (End Game):
             ø Azione:
-                - Creazione di routine controllo manuale non richiesto necessariamente;
+                - Creazione di routine controllo manuale non richiesto necessariamente.
+
     B. Risposte del sistema:
         → Feedback Immediato (Haptic/Visual):
             ø Risposta:
-                - Rumore ventole, accensione luci, cambio colore led (rgba), condensa sul vetro (glassmorfism, texture) > in base a Temperatura Interna > Temperatura esterna;
-                - Aggiornamento grafici in tempo reale sulla Dashboard;
+                - Rumore ventole, accensione luci, cambio colore led;
+                - Condensa sul vetro (glassmorphism) [Ref: Assets/Art/Shaders/Shader_Condensation];
+                - Aggiornamento grafici in tempo reale sulla Dashboard.
+            [⚠️ WARNING: Vedi P-DESIGN-006 Cecità da Condensa]
+
         → Feedback biologico:
             ø Risposta:
-                - (Morfogenesi): La pianta orienta le foglie verso la luce (Fototropismo);
+                - (Morfogenesi): La pianta orienta le foglie verso la luce (Fototropismo) [Ref: Assets/Scripts/Procedural/LSystemGenerator.cs];
                 - (Turgore): Le foglie si afflosciano se VWC < 10%;
-                - (Cromatica): Le foglie cambiano cromatura e colore esempio giallo (clorosi) se Azoto < Soglia;
+                - (Cromatica): Le foglie cambiano cromatura (clorosi) se Azoto < Soglia.
+
 3. Logica Indipendente (Motore logico non visibile):
-    A. Cicli Ambientali Autonomi
-        - Ciclo Idrologico:
-            → Evaporazione dal suolo;
-            → Saturazione Aria;
-            → Condensazione sulle pareti;
-            → Precipitazione (Gocciolamento);
-            → Ritorno al suolo;
+    A. Cicli Ambientali Autonomi [Ref: Assets/Scripts/Logic/ClimateLogic.cs]:
+        - Ciclo Idrologico & Drenaggio:
+            → Evaporazione, Saturazione, Condensazione;
+            → Accumulo e Drenaggio: SE Umidità Suolo > Capacità -> Scarto nel Serbatoio;
+            → Trasporto Sali: Il drenaggio sposta l'EC nel serbatoio scarti.
         - Termodinamica:
-            → Dispersione termica verso l'esterno (se spento) o accumulo calore (effetto serra se acceso);
-    B. Cicli Biologici Autonomi:
+            → Dispersione termica o accumulo calore.
+
+    B. Cicli Biologici Autonomi [Ref: Assets/Scripts/Logic/MetabolismLogic.cs]:
         - Sviluppo procedurale:
-            → Se Energia > CostoCreazioneNodo, il sistema genera una nuova mesh (Foglia o Ramo) usando algoritmi L-System;
-            - Sviluppo Design:
-                → La forma non è pre-renderizzata, è calcolata in base allo storico delle ultime 24h (Poca luce == Internodi lunghi);
-    C. Entropia e Imprevisti (Fattore Caos):
-        - Guesti Hardware:
-            → La pompa si blocca (Richiede intervento utente);
-        - Patogeni:
-            → Spore, Muffe si attivano se Umidità > 90% per x tempo;
-4. Obbiettivi e Progressione (Game Loop):
-    ¶ Fase 1: Survival (Short Term Game):
-        - Obiettivo:
-            → Mantenere i valori nella "Zona Verde" (Pianta in salute) [Omeostasi];
-        - Risultato:
-            → La pianta non muore. L'utente impara a leggere i segnali visivi (foglie gialle, punte secche...)
-    ¶ Fase 2: Ottimizzazione e Fioritura / Crescita (Mid term game):
-        - Obbiettivo:
-            → Introdurre la fioritura manipolando il fotoperiodo (es. simulare l'autunno accorciando le ore di luce);
-        - Risultato:
-            → Produzione del Fiore (Unico e procedurale);
-        - Reward:
-            → "Dati Ricerca" (Valuta di gioco) generati dal completamento del ciclo vitale;
-    ¶ Fase 3: Espansione e Automazione (Long Term Game):
-        - Obbiettivo:
-            → Creare il "Ciclo Perfetto" autosufficiente tramite programmazione dei timer;
-        - Azione:
-            → Acquisto di nuovi slot Capsula con i dati ricerca guadagnati, Acquisto di nuovi strumenti (Fattore efficienza strumenti);
-        - Risultato:
-            → Gestione di un intero laboratorio con piante multiple (Biomi diversi, Piante diverse, Genomi diversi);
-        - Endgame:
-            → Ibridazione (Incrocio piante per creare specie nuove);
-5. Struttura Dati (High Level):
-    Come il sistema "pensa" ai dati:
-        Entità                  Responsabilità                  Dati chiave
+            → Se Energia > CostoCreazioneNodo, il sistema genera una nuova mesh.
+        - Respirazione:
+            → Consumo costante di zuccheri (Metabolismo Basale).
+            [⚠️ WARNING: Vedi P-LOGIC-009 Asfissia CO2]
 
-        Environment             Gestisce la fisica              Temperatura, Umidità, CO2,
-        Controller              della stanza                    Livello Acqua
+    C. Cicli Microbioma [Ref: Assets/Scripts/Controllers/PlantController.cs]:
+        - Ciclo del Carbonio:
+            → Rilevamento Biomassa Morta e decomposizione tramite Nanobatteri;
+            → Rilascio Nutrienti (Loop chiuso).
 
-        Plant Model             Gestisce la vita                Salute, Stess, DNA (Regole
-                                                                Crescita), Biomassa
+    D. Entropia e Imprevisti:
+        - Guasti Hardware (Pompa bloccata).
+        - Patogeni (Muffe se Umidità > 90%).
 
-        Automation System       Sostituisce il giocatore        Script logici (IF this
-                                                                THEN that)
+4. Obiettivi e Progressione (Game Loop):
+    ¶ Fase 1: Survival (Omeostasi).
+    ¶ Fase 2: Ottimizzazione e Fioritura.
+    ¶ Fase 3: Espansione e Automazione.
+        [⚠️ WARNING: Vedi P-LOGIC-012 Senescenza Piante Annuali]
+    - Endgame: Ibridazione.
 
-        Time Manager            Gestisce il flusso temporale    Timestamp, DeltaTime,
-                                                                Calcolo Offline
+5. Struttura Dati (High Level - Implementation Map):
+    Collegamento diretto tra concetti e file C# in Assets/Scripts/Data/
+
+    | Entità                | Script C# Corrispondente       | Dati Chiave Gestiti                     |
+    |-----------------------|--------------------------------|-----------------------------------------|
+    | Environment           | EnvironmentData.cs             | temperature, humidity, co2Level, soilEC |
+    | Plant Model           | PlantData.cs                   | vigorIndex, storedEnergy, rootMass      |
+    | DNA Specie            | PlantSpecies.cs (ScriptableObj)| nodeEnergyCost, optimalTemp, growthRule |
+    | Costanti Universali   | GameConfig.cs                  | BASE_METABOLIC_RATE, TICK_INTERVAL      |
+    | Gestione Tempo        | TimeManager.cs                 | Timestamp, DeltaTime                    |
 
 6. Fase Preliminare: Selezione Genomica (Pre-Game Setup):
-    A. Il Catalogo Semi (Database Statico):
-        - Attore:
-            → Utente;
-        - Interfaccia:
-            → "La banca dei semi": (UI Olografica o schedario);
-        - Azione:
-            → L'utente scorre le schede tecniche delle specie disponibili;
-            -- Esempio scheda:
-                ø Nome:
-                    → Helianthus Annuus (Girasole);
-                ø Difficoltà:
-                    → Bassa;
-                ø Coefficienti Genetici (Traits):
-                    → Definizione matematica delle tolleranze (es. ColdResistance = 0.5);
-                ø Fattore Limitante Primario:
-                    → Indica all'utente quale parametro peserà di più sullo stress (es. "Richiede molta Luce").
+    A. Il Catalogo Semi (Database Statico) [Ref: Assets/Resources/SpeciesData/]:
+        - Attore: Utente.
+        - Interfaccia: "La banca dei semi".
+        - Dati Scheda:
+            ø Nome: Helianthus Annuus.
+            ø Difficoltà: Bassa.
+            ø Coefficienti Genetici: Definizione matematica tolleranze.
+            ø Fattore Limitante: Parametro di stress principale.
 
     B. Input e Conferma:
-        - Azione utente:
-            → Seleziona "Pianta Girasole";
-        - Elaborazione Sistema (Backend):
-            → Il sistema carica il Template del Girasole (Dati di sola lettura);
-            → Il sistema istanzia un nuovo oggetto PlantData (Dati scrivibili/dinamici);
-            ø Data Injection: Copia i valori base dal Template alla nuova istanza:
+        - Azione: Selezione Seme.
+        - Backend (Data Injection):
+            → Caricamento Template ScriptableObject;
+            → Istanziazione PlantData;
+            ø Copia Valori:
+                - VigorIndex Iniziale = 100% (Sostituisce Health);
+                - NodeEnergyCost: Sostituisce GrowthRate. Definisce costo energetico per nuovo nodo (es. 50 unità veloce, 500 lenta).
+                - L-System Rules: Regole geometriche.
 
-                - VigorIndex Iniziale:
-                    → Impostato a 100% (Sostituisce il concetto di Health/HP);
-
-                - NodeEnergyCost (Costo Energetico per Nodo) del Template:
-                    → Viene iniettato nel sistema di crescita al posto del "GrowthRate";
-                    → Definisce la soglia di energia necessaria per generare una nuova foglia/ramo;
-                    → Esempio: Girasole = 50 unità (Veloce), Quercia = 500 unità (Lenta);
-                    → Risultato: Il tempo rimane Real Time (1s = 1s), ma la frequenza di crescita cambia in base alla specie;
-
-                - L-System Rules (Regole geometriche):
-                    → Vengono caricati i valori che definiranno la forma grafica procedurale;
-
-    C. Configurazione Automatica dell'Ambiente (Stato Dormienza):
-        - Stato Iniziale:
-            → Il seme viene inserito nel sistema in stato "Dormiente" (Metabolismo = 0);
-        - Gameplay Loop Iniziale:
-            → Il giocatore ha tempo illimitato per regolare Temperatura e Luci senza danneggiare il seme;
-            → L'utente preme il comando "AVVIA GERMINAZIONE" per attivare la simulazione biologica.
+    C. Configurazione Automatica (Stato Dormienza):
+        - Stato Iniziale: Seme "Dormiente" (Metabolismo = 0).
+        - Loop Iniziale: Tempo illimitato per setup clima.
+        - Trigger: Utente preme "AVVIA GERMINAZIONE".
+        [⚠️ WARNING: Vedi P-LOGIC-011 Incoerenza Tasto Avvio]

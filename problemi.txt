@@ -1,176 +1,80 @@
-[ID] [PRIORITÀ] [STATO] [NOME UTENTE PRENOTAZIONE]- Titolo del Problema
+[ID] [PRIORITÀ] [STATO] [NOME UTENTE] - Titolo del Problema
 Descrizione: Dettagli su cosa manca o cosa non funziona.
+Target File: Lo script o l'asset responsabile nella struttura di progetto.
 ----------------------------------------------------------------------------------
 
 [P-DESIGN-001] [ALTA] [APERTO] - Concetto di "Salute" (HP) Inadatto
-    - Descrizione:
-        → Nel GDD e nel codice attuale si parla di "Health" o "MaxHealth" come in un gioco RPG. Le piante non hanno "punti vita".
-    - Fonte:
-        → Commento utente su "Data Injection".
-    - Impatto:
-        → Riduce il realismo. Non è chiaro quando la pianta muore.
+    - Descrizione: Le piante non hanno "punti vita". [cite_start]Sostituire con VigorIndex[cite: 72].
+    - Target File: Assets/Scripts/Data/PlantData.cs
 
-----------------------------------------------------------------------------------
+[P-DESIGN-002] [ALTA] [CHIUSO] [sandie69] - Conflitto GrowthRate vs Tempo Reale
+    - [cite_start]Descrizione: Sostituire velocità con Costo Energetico[cite: 75].
+    - Target File: Assets/Scripts/Data/PlantSpecies.cs (Variabile NodeEnergyCost)
 
-[P-DESIGN-002] [ALTA] [CHIUSO] [sandie69] - Conflitto GrowthRate vs Tempo Reale:
-    - Descrizione:
-        → Non si può usare un moltiplicatore di velocità (GrowthRate) per differenziare le piante, perché il tempo deve scorrere uguale per tutti (1 sec = 1 sec).
-    - Fonte:
-        → Commento utente su "Sviluppo Design".
-    - Impatto:
-        → Se acceleriamo il tempo per una pianta, disallineiamo i grafici e la simulazione fisica.
-
-----------------------------------------------------------------------------------
-
-[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti":
-    - Descrizione:
-        → I termini attuali sono troppo "arcade". Dire che una pianta ha "Requisito: Caldo" o "Abilità: Resistenza" è vago matematicamente.
-    - Fonte:
-        → Commento utente su "Tratto Speciale".
-    - Impatto:
-        → Difficile programmare la differenza tra un Cactus e una Felce senza numeri precisi.
-
-----------------------------------------------------------------------------------
+[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti"
+    - Descrizione: Termini troppo arcade. [cite_start]Servono coefficienti matematici[cite: 78].
+    - Target File: Assets/Scripts/Data/PlantSpecies.cs
 
 [P-DESIGN-004] [ALTA] [APERTO] - Disallineamento Iniziale (Hardcore Mode)
-    - Descrizione:
-        → Se il giocatore inizia una partita "Hardcore" con parametri ambientali sbagliati (es. stanza fredda), la pianta (seme) subisce danni immediati appena istanziata, morendo prima che il giocatore possa toccare i controlli.
-    - Fonte:
-        → Commento utente su "Configurazione Automatica".
-    - Impatto:
-        → Frustrazione del giocatore, game over immediato ingiusto.
-
-----------------------------------------------------------------------------------
+    - Descrizione: Il seme muore subito se la stanza è fredda. [cite_start]Serve stato "Dormiente"[cite: 82].
+    - Target File: Assets/Scripts/Core/GameManager.cs (Logica StartGame)
 
 [P-DESIGN-005] [ALTA] [APERTO] - Ingiocabilità delle Stagioni in Tempo Reale
-    - Falla:
-        [cite_start]→ La Fase 2 prevede di "Simulare l'autunno" per indurre la fioritura [cite: 23] [cite_start]in un gioco basato sul Tempo Reale[cite: 48].
-    - Problema:
-        → Una pianta reale può impiegare 2-3 mesi per fiorire dopo il cambio di fotoperiodo.
-        → In un gioco mobile, chiedere all'utente di aspettare 60 giorni reali per vedere un fiore (senza fare nulla se non guardare) distrugge il loop di gioco.
-        → C'è un conflitto tra il concetto "Hard-Sci Real Time" e la necessità di feedback ludico entro tempi umani.
-
-----------------------------------------------------------------------------------
+    - Descrizione: Aspettare 60 giorni per un fiore è noioso. [cite_start]Conflitto RealTime vs Gameplay[cite: 85].
+    - Target File: Assets/Scripts/Core/TimeManager.cs (Configurazione TimeMultiplier)
 
 [P-DESIGN-006] [BASSA] [APERTO] - Cecità da Condensa (Conflitto Fisica vs UX)
-    - Falla:
-        → Il feedback visivo prevede "Condensa sul vetro" basata sulla termodinamica.
-    - Problema:
-        → Se il giocatore crea un ambiente tropicale (Alta Umidità + Alta Temperatura interna vs Esterno freddo), il vetro si appannerà completamente.
-        → Questo è fisicamente corretto, ma ludicamente disastroso: il giocatore non può più vedere la pianta (il soggetto principale del gioco) proprio quando le condizioni sono ottimali.
-        → Serve una meccanica di "Tergicristallo", ventilazione forzata sul vetro o un materiale idrofobico per garantire la visibilità.
+    - Descrizione: Il vetro si appanna troppo. [cite_start]Serve meccanica tergicristallo/ventola[cite: 90].
+    - Target File: Assets/Art/Shaders/Shader_Condensation (Parametri trasparenza)
 
-----------------------------------------------------------------------------------
+[P-LOGIC-001] [ALTA] [APERTO] - Paradosso Termico del Sistema Chiuso
+    - Descrizione: Manca dissipazione attiva. [cite_start]La temperatura sale all'infinito[cite: 93].
+    - Target File: Assets/Scripts/Logic/ClimateLogic.cs (Calcolo DeltaTemp)
 
-[P-LOGIC-001] [ALTA] [APERTO] - Paradosso Termico del Sistema Chiuso:
-    - Falla:
-        → La capsula è definita "isolata" o "chiusa", ma l'utente continua ad iniettare energia (Luce / Riscaldamento). In un Sistema veramente isolato, il calore non ha dove andare se non  c'è uno scambiatore attivo (radiatore / condizionatore);
-    - Problema: (Conseguenze)
-        → Se la temperatura esterna è 20°C e accendo una lampada LED potente dentro una scatola di vetro chiusa, la temperatura interna salirà all'infinito (effetto serra) fino a cuocere la pianta, a meno che la "Dispersione Termica" citata non sia calcolata su una superfice radiante specifica. Attualmente il modello termodinamico sembra mancare del fattore "Dissipazione Attiva".
-        // Biologo
+[P-LOGIC-002] [ALTA] [RISOLTO] [sandie69] - Accumulo di Massa e Saturazione
+    - [cite_start]Descrizione: L'acqua in eccesso deve drenare in un serbatoio[cite: 97].
+    - Target File: Assets/Scripts/Controllers/WasteManager.cs
 
-----------------------------------------------------------------------------------
+[P-LOGIC-003] [ALTA] [APERTO] - Il "Root Bound" (Saturazione Radicale)
+    - Descrizione: Le radici crescono all'infinito. [cite_start]Serve limite fisico vaso[cite: 100].
+    - Target File: Assets/Scripts/Data/PlantData.cs (Variabile MaxRootVolume)
 
-[P-LOGIC-002] [ALTA] [APERTO] - Accumulo di Massa e Saturazione:
-    - Falla:
-        → L'utente inietta "Nutrienti" e "Acqua" (Massa in entrata), la pianta cresce (Massa solida).
-    - Problema:
-        → In una capsula sigillata di volume finito, se continuo ad aggiungere acqua e nutrienti senza mai togliere nulla (es. potatura, drenaggio scarti), la capsula si riempirà fisicamente fino a scoppiare o affogare tutto. Manca la logica di gestione dei rifiuti o del drenaggio dell'eccesso. Dove va a finire l'acqua che non viene assorbita?
-        // Biologo
+[P-LOGIC-004] [ALTA] [RISOLTO] [sandie69] - Assenza del Microbioma
+    - Descrizione: Le foglie morte non si decompongono. [cite_start]Serve MicrobiomaManager[cite: 104].
+    - Target File: Assets/Scripts/Controllers/PlantController.cs (Gestione Biomassa Morta)
 
-----------------------------------------------------------------------------------
+[P-LOGIC-005] [MEDIA] [APERTO] - Riproduzione in Isolamento
+    - [cite_start]Descrizione: Manca impollinazione (Manuale o Robotica)[cite: 108].
+    - Target File: Assets/Scripts/UI/InteractionView.cs (Azione "Impollina")
 
-[P-LOGIC-003] [ALTA] [APERTO] - Il "Root Bound" (Saturazione Radicale):
-    - Falla:
-        → La progettazione prevede la crescita delle radici (RootMass), am non considera il volume del vaso / terreno;
-    - Problema:
-        → In un microambiente, le radici toccano le pareti molto presto ("Root Bound"). Nella realtà, quando questo accade, la pianta smette di crescere, si stressa e muore per soffocamento radicale. Nel gioco attuale, sembra che la pianta possa crescere all'infinito nello stesso slot, il che è biologicamente impossibile per il "Long Term Game" (Fase 3);
+[P-LOGIC-006] [ALTA] [APERTO] - Il Paradosso dell'Osservazione Notturna
+    - [cite_start]Descrizione: Guardare la pianta di notte interrompe il fotoperiodo[cite: 112].
+    - Target File: Assets/Scripts/Controllers/EnvironmentCtrl.cs (Spettro non visibile/IR)
 
-----------------------------------------------------------------------------------
+[P-LOGIC-007] [BASSA] [APERTO] - La Noia dell'Automazione (EndGame)
+    - Descrizione: Il gioco perfetto si gioca da solo. [cite_start]Manca entropia[cite: 116].
+    - Target File: Assets/Scripts/Core/GameManager.cs (Eventi Casuali)
 
-[P-LOGIC-004] [ALTA] [APERTO] - Assenza del Microbioma (Il Ciclo Spezzato):
-    - Falla:
-        → Si parla di foglie che cadono o muoiono. In un ambiente "sterile" da laboratorio (senza batteri, funghi o insetti decompositori), una foglia morta non si decompone, semplicemente si secca e resta li;
-    - Problema:
-        → Senza Decomposizione, i nutrienti bloccati nella foglia morta non tornano nel terreno. Il ciclo dei nutrienti è aperto, non chiuso. L'utente sarà costretto a comprare fertilizzante all'infinito perché la materia organica morta diventa solo "spazzatura" che ingombra la visuale e non risorsa.
+[P-LOGIC-008] [ALTA] [RISOLTO] [sandie69] - Salinizzazione del Terreno
+    - Descrizione: Accumulo sali tossici. [cite_start]Serve meccanica Flush[cite: 119].
+    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Calcolo EC Accumulo)
 
-[P-LOGIC-005] [MEDIA] [APERTO] - Riproduzione in Isolamento:
-    - Falla:
-        → Nella fase 2&3 si parla di "Fioritura" e "Ibridazione";
-    - Problema:
-        → Chi Impollina il fiore? In una capsula chiusa non c'è vento e non ci sono api. Se la pianta non è auto-impollinante (e molte non lo sono), il ciclo vitale si ferma al fiore che appassisce senza fare i semi. Manca la meccanica dell'impollinazione (Manuale o robotica);
+[P-LOGIC-009] [ALTA] [APERTO] - Asfissia da CO2
+    - [cite_start]Descrizione: La pianta consuma tutta la CO2 in un sistema sigillato[cite: 122].
+    - Target File: Assets/Scripts/Logic/MetabolismLogic.cs (Consumo CO2 per ora)
 
-----------------------------------------------------------------------------------
-
-[P-LOGIC-006] [ALTA] [APERTO] - Il Paradosso dell'Osservazione Notturna:
-    - Falla:
-        → La pianta ha bisogno di buio assoluto per la respirazione notturna (fotoperiodo);
-    - Problema:
-        → Se il giocatore può giocare solo la sera (es. dopo lavoro), troverà la capsula al buio. Se accende la luce (o la luce del telefono / App) per vedere la pianta e "giocare", interrompe il ciclo di sonno della pianta, stressandola o bloccando la fioritura. Il gioco punisce il giocatore per il solo fatto di voler guardare la pianta nell'orario sbagliato.
-
-----------------------------------------------------------------------------------
-
-[P-LOGIC-007] [BASSA] [APERTO] - La Noia dell'Automazione (EndGame):
-    - Falla:
-        → L'obbiettivo della fase 3 è "Creare il Ciclo Perfetto autosufficiente";
-    - Problema:
-        → Se il giocatore ha successo e crea il ciclo perfetto, il gioco si gioca da solo. Non c'è più nessun imput richiesto dall'utente. Il successo porta alla "Morte del gameplay" (Il giocatore) viene esempio punito per il solo fatto di voler guardare la pianta nell'orario sbagliato;
-
-----------------------------------------------------------------------------------
-
-[P-LOGIC-008] [ALTA] [APERTO] - Salinizzazione del Terreno:
-    - Falla:
-        → L'utente inietta soluzioni nutrienti (Sali Minerali). L'acqua evapora, ma i sali restano.
-    - Problema:
-        → In agricoltura chiusa, questo porta rapidamente alla Salinizzazione tossica del substrato (Ec/Conducibilità elettrica alle stelle). Senza una meccanica di "Flush" (lavaggio del terreno con acqua pura e drenaggio), la pianta morirà per tossicità da sali dopo poche settimane di gioco, indipendentemente dalla bravura del giocatore;
-
-----------------------------------------------------------------------------------
-
-[P-LOGIC-009] [ALTA] [APERTO] - Asfissia da CO2 (Contraddizione "Isolata" vs "Ventilata")
-    - Falla:
-        [cite_start]→ Nel Core Concept la capsula è definita "Isolata" [cite: 2][cite_start], ma nei feedback si parla di "Rumore ventole"[cite: 10].
-    - Problema:
-        → Se la capsula è veramente isolata (sigillata), la pianta consumerà tutta la CO2 disponibile in poche ore di luce, bloccando la fotosintesi (Starvation).
-        → Se invece ci sono ventole che prendono aria da fuori, la capsula non è isolata e perde il controllo su Umidità e Temperatura (dipende dalla stanza del giocatore).
-        → Manca il componente "Iniettore di CO2" o un sistema di riciclo atmosferico realistico per un sistema chiuso.
-
-----------------------------------------------------------------------------------
-
-[P-LOGIC-010] [MEDIA] [APERTO] - Antagonismo dei Nutrienti (Legge di Mulder)
-    - Falla:
-        [cite_start]→ L'azione prevede "Iniezione Soluzione Nutriente (Nitrogen, Potassium, Phosphorus)" [cite: 7] come input diretti.
-    - Problema:
-        → Nella chimica reale, aggiungere troppo di un elemento blocca l'assorbimento di un altro (Antagonismo).
-        → Esempio: Un eccesso di Potassio (K) impedisce l'assorbimento del Magnesio (Mg) e del Calcio (Ca), anche se questi sono presenti.
-        → Il sistema attuale suggerisce che "più è meglio", mentre biologicamente serve un "Bilanciamento Ionico". Senza questa logica, il gioco è un semplice "riempi la barra" e non una simulazione scientifica.
-
-----------------------------------------------------------------------------------
+[P-LOGIC-010] [MEDIA] [APERTO] - Antagonismo dei Nutrienti
+    - Descrizione: Troppo Potassio blocca il Magnesio. [cite_start]Serve logica chimica complessa[cite: 126].
+    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Legge di Mulder)
 
 [P-LOGIC-011] [BASSA] [APERTO] - Incoerenza Biologica del "Tasto Avvio"
-    - Falla:
-        [cite_start]→ Nella soluzione implementata per il setup (Punto 6.C), l'utente preme "AVVIA GERMINAZIONE" [cite: 52] dopo aver regolato il clima.
-    - Problema:
-        → In natura, un seme non aspetta un comando digitale. [cite_start]Se il terreno è umido [cite: 12] e la temperatura è giusta, il seme parte da solo per processi osmotici.
-        → Avere un seme in un terreno bagnato che resta "dormiente" per giorni finché l'utente non clicca Start è biologicamente errato (il seme marcirebbe).
+    - Descrizione: Il seme aspetta il click per germinare. [cite_start]È irrealistico[cite: 131].
+    - Target File: Assets/Scripts/Core/GameManager.cs
 
-----------------------------------------------------------------------------------
-
-[P-LOGIC-012] [ALTA] [APERTO] - Senescenza Programmata (Il problema delle piante annuali)
-    - Falla:
-        → L'esempio usato è il "Girasole" (Helianthus Annuus). Il gioco promette una "Fase 3: Long Term Game" ed espansione.
-    - Problema:
-        → Il Girasole è una pianta annuale. Geneticamente, dopo la fioritura, la pianta *deve* morire (Senescenza). Non importa quanto il giocatore sia bravo a curarla.
-        → Se il gioco permette di mantenere vivo un Girasole per anni, perde la validità scientifica.
-        → Se il gioco uccide il Girasole dopo il fiore (corretto biologicamente), la "Fase 3" (Endgame) viene interrotta bruscamente per tutte le specie non perenni.
-
-----------------------------------------------------------------------------------
+[P-LOGIC-012] [ALTA] [APERTO] - Senescenza Programmata
+    - Descrizione: Le piante annuali devono morire dopo il fiore. [cite_start]Rompe la Fase 3[cite: 135].
+    - Target File: Assets/Scripts/Data/PlantSpecies.cs (Variabile IsPerennial)
 
 [P-LOGIC-013] [MEDIA] [APERTO] - Deriva del pH e Blocco dei Nutrienti
-    - Falla:
-        → Il sistema gestisce l'iniezione di nutrienti (NPK) ma ignora il pH del substrato.
-    - Problema:
-        → Quando una pianta assorbe nutrienti, rilascia ioni che alterano l'acidità (pH) del terreno.
-        → Se il pH esce dal range ottimale (es. 5.5 - 6.5), i nutrienti presenti nel terreno diventano chimicamente indisponibili ("Nutrient Lockout").
-        → Senza la gestione del pH (tramite soluzioni pH Up/Down), il giocatore vedrà la pianta morire di fame anche se il terreno è pieno di fertilizzante.
-
-
+    - Descrizione: Il pH cambia e blocca l'assorbimento. [cite_start]Serve gestione pH Up/Down[cite: 141].
+    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Gestione Acidità)

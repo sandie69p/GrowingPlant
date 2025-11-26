@@ -1,27 +1,33 @@
 RIF: [ID-PROBLEMA] [UTENTE PRENOTAZIONE]
 Logica: Spiegazione discorsiva o pseudo-codice.
 Note Tecniche: Variabili chiave, formule matematiche da usare.
-
 ---------------------------------------------------------------------------
 
 RIF: [P-DESIGN-002] [sandie69] [RISOLTO] - Conflitto GrowthRate vs Tempo Reale
     Logica (Modello Energetico):
         → Invece di usare un moltiplicatore di velocità astratto (GrowthRate), si adotta il "Costo Energetico per Nodo" (NodeEnergyCost).
-        → Il tempo scorre uguale per tutte le piante (Real Time). La differenza di velocità di crescita è data da quanto "costa" alla pianta creare una nuova parte di se stessa.
-
+        → Il tempo scorre uguale per tutte le piante (Real Time). [cite_start]La differenza di velocità è data dal costo energetico per creare una nuova parte[cite: 146].
     Algoritmo:
-        1. La Fotosintesi produce Energia (Zuccheri) accumulata in un serbatoio (StoredEnergy).
-        2. Ogni specie ha una costante 'EnergyCostPerNode' nel suo DNA.
-            - Specie Veloci (es. Erbacee): Costo Basso (es. 50 unità).
-            - Specie Lente (es. Legnose): Costo Alto (es. 500 unità).
-        3. CHECK CRESCITA (Ogni Tick):
-            SE (StoredEnergy > EnergyCostPerNode) ALLORA:
-                -> Sottrai EnergyCostPerNode da StoredEnergy;
-                -> Genera Nuovo Nodo (Crescita Visiva);
-
+        1. La Fotosintesi produce Energia (Zuccheri) in StoredEnergy.
+        2. [cite_start]Ogni specie ha 'EnergyCostPerNode' (es. 50 unità veloce, 500 lenta)[cite: 150].
+        3. [cite_start]CHECK CRESCITA: SE (StoredEnergy > EnergyCostPerNode) -> Sottrai Costo -> Genera Nodo[cite: 152].
     Note Tecniche:
     - Variabile in PlantSpecies: `public float nodeEnergyCost;`
     - Variabile in PlantData: `public float storedEnergy;`
-    - Nessuna modifica al TimeManager richiesta.
 
----------------------------------------------------------------------------
+RIF: [P-LOGIC-004] [sandie69] [RISOLTO] - Assenza del Microbioma
+    Logica (Gestione Organica):
+        [cite_start]→ Decomposizione tramite nanobatteri specializzati "buoni" (Microbioma Sintetico)[cite: 154].
+        [cite_start]→ Quando una foglia muore, i nanobatteri la decompongono e rilasciano nutrienti nel terreno, chiudendo il ciclo[cite: 156].
+    Note Tecniche:
+    - Nuova Entità: `MicrobiomeManager`.
+    - [cite_start]Variabili: `DeadBiomass`, `DecompositionRate`[cite: 158].
+
+RIF: [P-LOGIC-002] & [P-LOGIC-008] [sandie69] [RISOLTO] - Saturazione Idrica e Salina
+    Logica (Gestione Idraulica e Flush):
+        [cite_start]→ Sistema a "Doppio Fondo" con serbatoio scarti[cite: 159].
+        [cite_start]→ Problema Acqua: SE Umidità Suolo > Capacità Massima -> Drena nel Serbatoio Scarti[cite: 161].
+        [cite_start]→ Problema Sali: Flush (irrigazione eccessiva) scioglie i sali e li spinge nel serbatoio, abbassando l'EC del terreno[cite: 163].
+    Note Tecniche:
+    - Variabili: `WasteTankLevel`, `SoilEC`.
+    - [cite_start]Logica: `IF (SoilVWC > MaxCapacity) THEN MoveExcessTo(WasteTank)`[cite: 165].
