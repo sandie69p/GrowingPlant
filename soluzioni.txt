@@ -1,18 +1,27 @@
-RIF: [ID-PROBLEMA]
+RIF: [ID-PROBLEMA] [UTENTE PRENOTAZIONE]
 Logica: Spiegazione discorsiva o pseudo-codice.
 Note Tecniche: Variabili chiave, formule matematiche da usare.
----------------------------------------------------
 
-Esempio pratico:
+---------------------------------------------------------------------------
 
-RIF: [P-001]
-Logica: Creare 3 classi separate (EnvironmentData, PlantData, PlantSpecies).
-EnvironmentData deve usare float per NPK e PH.
-PlantData deve avere variabili separate per i tipi di stress (Termico, Idrico).
-Note Tecniche: Usare [System.Serializable] sopra le classi.
+RIF: [P-DESIGN-002] [sandie69] [RISOLTO] - Conflitto GrowthRate vs Tempo Reale
+    Logica (Modello Energetico):
+        → Invece di usare un moltiplicatore di velocità astratto (GrowthRate), si adotta il "Costo Energetico per Nodo" (NodeEnergyCost).
+        → Il tempo scorre uguale per tutte le piante (Real Time). La differenza di velocità di crescita è data da quanto "costa" alla pianta creare una nuova parte di se stessa.
 
-RIF: [P-002]
-Logica: Creare un Singleton TimeManager.
-Allo Start(), calcolare (DateTime.Now - LastSaveTime).
-Il risultato (DeltaTime) viene passato a un loop che simula X ore in un istante.
-Formula: OrePassate = (TickInterval * Multiplier) / 3600.
+    Algoritmo:
+        1. La Fotosintesi produce Energia (Zuccheri) accumulata in un serbatoio (StoredEnergy).
+        2. Ogni specie ha una costante 'EnergyCostPerNode' nel suo DNA.
+            - Specie Veloci (es. Erbacee): Costo Basso (es. 50 unità).
+            - Specie Lente (es. Legnose): Costo Alto (es. 500 unità).
+        3. CHECK CRESCITA (Ogni Tick):
+            SE (StoredEnergy > EnergyCostPerNode) ALLORA:
+                -> Sottrai EnergyCostPerNode da StoredEnergy;
+                -> Genera Nuovo Nodo (Crescita Visiva);
+
+    Note Tecniche:
+    - Variabile in PlantSpecies: `public float nodeEnergyCost;`
+    - Variabile in PlantData: `public float storedEnergy;`
+    - Nessuna modifica al TimeManager richiesta.
+
+---------------------------------------------------------------------------

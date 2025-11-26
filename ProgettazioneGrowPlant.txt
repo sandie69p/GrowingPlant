@@ -102,10 +102,11 @@ Game Design Document diviso in fasi:
                     → Helianthus Annuus (Girasole);
                 ø Difficoltà:
                     → Bassa;
-                ø Tratto Speciale:
-                    → // Troppo generico, una pianta non ha sostanzialmente una caratteristica speciale, esempio il girasole ha bisogno di tanta luce, semplicemente cambia la costante attribbuto della pianta
-                ø Requisiti essenziali:
-                    → // Non è un requisito essenziale in gergo scientifico, sostanzialmente il freddo ha un pressure_stress maggiore di altri aspetti, quindi ha un peso ogni fattore pianta.
+                ø Coefficienti Genetici (Traits):
+                    → Definizione matematica delle tolleranze (es. ColdResistance = 0.5);
+                ø Fattore Limitante Primario:
+                    → Indica all'utente quale parametro peserà di più sullo stress (es. "Richiede molta Luce").
+
     B. Input e Conferma:
         - Azione utente:
             → Seleziona "Pianta Girasole";
@@ -113,9 +114,22 @@ Game Design Document diviso in fasi:
             → Il sistema carica il Template del Girasole (Dati di sola lettura);
             → Il sistema istanzia un nuovo oggetto PlantData (Dati scrivibili/dinamici);
             ø Data Injection: Copia i valori base dal Template alla nuova istanza:
-                - MaxHealth del template:
-                    → diventa CurrentHealth della pianta // Non sono sicuro che sia corretto dare una vita alla pianta, normalmente come si definisce la salute di una pianta?
-                - GrowthRate del Template:
-                    → Diventa il moltiplicatore della simulazione // premesso che la simulazione deve essere in real time non posso usare un growrate che influisce sul tempo perché deve rispettare il tempo, quindi influisce anche sulla velocità dei grafici;
+
+                - VigorIndex Iniziale:
+                    → Impostato a 100% (Sostituisce il concetto di Health/HP);
+
+                - NodeEnergyCost (Costo Energetico per Nodo) del Template:
+                    → Viene iniettato nel sistema di crescita al posto del "GrowthRate";
+                    → Definisce la soglia di energia necessaria per generare una nuova foglia/ramo;
+                    → Esempio: Girasole = 50 unità (Veloce), Quercia = 500 unità (Lenta);
+                    → Risultato: Il tempo rimane Real Time (1s = 1s), ma la frequenza di crescita cambia in base alla specie;
+
                 - L-System Rules (Regole geometriche):
-                    → Vengono caricati i valori nella grafica;
+                    → Vengono caricati i valori che definiranno la forma grafica procedurale;
+
+    C. Configurazione Automatica dell'Ambiente (Stato Dormienza):
+        - Stato Iniziale:
+            → Il seme viene inserito nel sistema in stato "Dormiente" (Metabolismo = 0);
+        - Gameplay Loop Iniziale:
+            → Il giocatore ha tempo illimitato per regolare Temperatura e Luci senza danneggiare il seme;
+            → L'utente preme il comando "AVVIA GERMINAZIONE" per attivare la simulazione biologica.

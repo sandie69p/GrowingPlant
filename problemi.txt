@@ -12,7 +12,7 @@ Descrizione: Dettagli su cosa manca o cosa non funziona.
 
 ----------------------------------------------------------------------------------
 
-[P-DESIGN-002] [ALTA] [APERTO] - Conflitto GrowthRate vs Tempo Reale
+[P-DESIGN-002] [ALTA] [CHIUSO] [sandie69] - Conflitto GrowthRate vs Tempo Reale:
     - Descrizione:
         → Non si può usare un moltiplicatore di velocità (GrowthRate) per differenziare le piante, perché il tempo deve scorrere uguale per tutti (1 sec = 1 sec).
     - Fonte:
@@ -22,7 +22,7 @@ Descrizione: Dettagli su cosa manca o cosa non funziona.
 
 ----------------------------------------------------------------------------------
 
-[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti"
+[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti":
     - Descrizione:
         → I termini attuali sono troppo "arcade". Dire che una pianta ha "Requisito: Caldo" o "Abilità: Resistenza" è vago matematicamente.
     - Fonte:
@@ -42,11 +42,32 @@ Descrizione: Dettagli su cosa manca o cosa non funziona.
 
 ----------------------------------------------------------------------------------
 
+[P-DESIGN-005] [ALTA] [APERTO] - Ingiocabilità delle Stagioni in Tempo Reale
+    - Falla:
+        [cite_start]→ La Fase 2 prevede di "Simulare l'autunno" per indurre la fioritura [cite: 23] [cite_start]in un gioco basato sul Tempo Reale[cite: 48].
+    - Problema:
+        → Una pianta reale può impiegare 2-3 mesi per fiorire dopo il cambio di fotoperiodo.
+        → In un gioco mobile, chiedere all'utente di aspettare 60 giorni reali per vedere un fiore (senza fare nulla se non guardare) distrugge il loop di gioco.
+        → C'è un conflitto tra il concetto "Hard-Sci Real Time" e la necessità di feedback ludico entro tempi umani.
+
+----------------------------------------------------------------------------------
+
+[P-DESIGN-006] [BASSA] [APERTO] - Cecità da Condensa (Conflitto Fisica vs UX)
+    - Falla:
+        → Il feedback visivo prevede "Condensa sul vetro" basata sulla termodinamica.
+    - Problema:
+        → Se il giocatore crea un ambiente tropicale (Alta Umidità + Alta Temperatura interna vs Esterno freddo), il vetro si appannerà completamente.
+        → Questo è fisicamente corretto, ma ludicamente disastroso: il giocatore non può più vedere la pianta (il soggetto principale del gioco) proprio quando le condizioni sono ottimali.
+        → Serve una meccanica di "Tergicristallo", ventilazione forzata sul vetro o un materiale idrofobico per garantire la visibilità.
+
+----------------------------------------------------------------------------------
+
 [P-LOGIC-001] [ALTA] [APERTO] - Paradosso Termico del Sistema Chiuso:
     - Falla:
         → La capsula è definita "isolata" o "chiusa", ma l'utente continua ad iniettare energia (Luce / Riscaldamento). In un Sistema veramente isolato, il calore non ha dove andare se non  c'è uno scambiatore attivo (radiatore / condizionatore);
     - Problema: (Conseguenze)
         → Se la temperatura esterna è 20°C e accendo una lampada LED potente dentro una scatola di vetro chiusa, la temperatura interna salirà all'infinito (effetto serra) fino a cuocere la pianta, a meno che la "Dispersione Termica" citata non sia calcolata su una superfice radiante specifica. Attualmente il modello termodinamico sembra mancare del fattore "Dissipazione Attiva".
+        // Biologo
 
 ----------------------------------------------------------------------------------
 
@@ -55,6 +76,7 @@ Descrizione: Dettagli su cosa manca o cosa non funziona.
         → L'utente inietta "Nutrienti" e "Acqua" (Massa in entrata), la pianta cresce (Massa solida).
     - Problema:
         → In una capsula sigillata di volume finito, se continuo ad aggiungere acqua e nutrienti senza mai togliere nulla (es. potatura, drenaggio scarti), la capsula si riempirà fisicamente fino a scoppiare o affogare tutto. Manca la logica di gestione dei rifiuti o del drenaggio dell'eccesso. Dove va a finire l'acqua che non viene assorbita?
+        // Biologo
 
 ----------------------------------------------------------------------------------
 
@@ -103,3 +125,52 @@ Descrizione: Dettagli su cosa manca o cosa non funziona.
         → In agricoltura chiusa, questo porta rapidamente alla Salinizzazione tossica del substrato (Ec/Conducibilità elettrica alle stelle). Senza una meccanica di "Flush" (lavaggio del terreno con acqua pura e drenaggio), la pianta morirà per tossicità da sali dopo poche settimane di gioco, indipendentemente dalla bravura del giocatore;
 
 ----------------------------------------------------------------------------------
+
+[P-LOGIC-009] [ALTA] [APERTO] - Asfissia da CO2 (Contraddizione "Isolata" vs "Ventilata")
+    - Falla:
+        [cite_start]→ Nel Core Concept la capsula è definita "Isolata" [cite: 2][cite_start], ma nei feedback si parla di "Rumore ventole"[cite: 10].
+    - Problema:
+        → Se la capsula è veramente isolata (sigillata), la pianta consumerà tutta la CO2 disponibile in poche ore di luce, bloccando la fotosintesi (Starvation).
+        → Se invece ci sono ventole che prendono aria da fuori, la capsula non è isolata e perde il controllo su Umidità e Temperatura (dipende dalla stanza del giocatore).
+        → Manca il componente "Iniettore di CO2" o un sistema di riciclo atmosferico realistico per un sistema chiuso.
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-010] [MEDIA] [APERTO] - Antagonismo dei Nutrienti (Legge di Mulder)
+    - Falla:
+        [cite_start]→ L'azione prevede "Iniezione Soluzione Nutriente (Nitrogen, Potassium, Phosphorus)" [cite: 7] come input diretti.
+    - Problema:
+        → Nella chimica reale, aggiungere troppo di un elemento blocca l'assorbimento di un altro (Antagonismo).
+        → Esempio: Un eccesso di Potassio (K) impedisce l'assorbimento del Magnesio (Mg) e del Calcio (Ca), anche se questi sono presenti.
+        → Il sistema attuale suggerisce che "più è meglio", mentre biologicamente serve un "Bilanciamento Ionico". Senza questa logica, il gioco è un semplice "riempi la barra" e non una simulazione scientifica.
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-011] [BASSA] [APERTO] - Incoerenza Biologica del "Tasto Avvio"
+    - Falla:
+        [cite_start]→ Nella soluzione implementata per il setup (Punto 6.C), l'utente preme "AVVIA GERMINAZIONE" [cite: 52] dopo aver regolato il clima.
+    - Problema:
+        → In natura, un seme non aspetta un comando digitale. [cite_start]Se il terreno è umido [cite: 12] e la temperatura è giusta, il seme parte da solo per processi osmotici.
+        → Avere un seme in un terreno bagnato che resta "dormiente" per giorni finché l'utente non clicca Start è biologicamente errato (il seme marcirebbe).
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-012] [ALTA] [APERTO] - Senescenza Programmata (Il problema delle piante annuali)
+    - Falla:
+        → L'esempio usato è il "Girasole" (Helianthus Annuus). Il gioco promette una "Fase 3: Long Term Game" ed espansione.
+    - Problema:
+        → Il Girasole è una pianta annuale. Geneticamente, dopo la fioritura, la pianta *deve* morire (Senescenza). Non importa quanto il giocatore sia bravo a curarla.
+        → Se il gioco permette di mantenere vivo un Girasole per anni, perde la validità scientifica.
+        → Se il gioco uccide il Girasole dopo il fiore (corretto biologicamente), la "Fase 3" (Endgame) viene interrotta bruscamente per tutte le specie non perenni.
+
+----------------------------------------------------------------------------------
+
+[P-LOGIC-013] [MEDIA] [APERTO] - Deriva del pH e Blocco dei Nutrienti
+    - Falla:
+        → Il sistema gestisce l'iniezione di nutrienti (NPK) ma ignora il pH del substrato.
+    - Problema:
+        → Quando una pianta assorbe nutrienti, rilascia ioni che alterano l'acidità (pH) del terreno.
+        → Se il pH esce dal range ottimale (es. 5.5 - 6.5), i nutrienti presenti nel terreno diventano chimicamente indisponibili ("Nutrient Lockout").
+        → Senza la gestione del pH (tramite soluzioni pH Up/Down), il giocatore vedrà la pianta morire di fame anche se il terreno è pieno di fertilizzante.
+
+
