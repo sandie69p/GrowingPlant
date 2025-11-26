@@ -1,121 +1,99 @@
-Game Design Document - BIO-CAPSULE
-Stato: Integrato con Architettura Unity e Issue Tracking
+TITOLO: BIO-CAPSULE - Game Design Document (v2.1)
+TIPO: Simulatore Scientifico Hardcore (Hard Sci-Fi)
+STATO: Ready for Development (Tutti i problemi risolti in fase design)
 
-1. Core Concept e visione:
-    - Ruolo del Giocare: Bio-Tecnico / Supervisore di laboratorio.
-    - L'Attore (Il Sistema): La Capsula (Isolata), La Pianta (organismo).
-    - Filosofia: Il giocatore non "Coltiva" direttamente la pianta ma gestisce le variabili che permettono la vita.
-    - Script Core: [Ref: Assets/Scripts/Core/GameManager.cs]
+1. CORE CONCEPT E VISIONE
+-------------------------------------------------------------------------
+- Ruolo del Giocatore: Operatore Bio-Sistemico (gestione remota).
+- L'Attore (Il Sistema): Un ecosistema chiuso termodinamicamente isolato.
+- Filosofia: "Trust No One, Measure Everything". La natura è ostile, l'hardware è inaffidabile. Non si "coltiva" la pianta direttamente; si gestiscono le variabili chimico-fisiche (VPD, Joule, Moli) per permettere l'omeostasi. La pianta muore se le leggi della fisica vengono ignorate.
+- Script Core: [Ref: Assets/Scripts/Core/GameManager.cs]
 
-2. Mappatura delle interazioni (User & System):
-    A. Azioni Dell'utente (Input):
-        → Regolazione climatica [Ref: Assets/Scripts/Controllers/EnvironmentCtrl.cs]:
-            ø Azione:
-                - Impostazione set-point Termostato (es. target 24°C);
-                - Impostazione set-point Umidostato (es. target 60%).
-            [⚠️ WARNING: Vedi P-LOGIC-001 Paradosso Termico]
+2. MAPPATURA INTERAZIONI (USER & SYSTEM)
+-------------------------------------------------------------------------
+A. GESTIONE HARDWARE E POSIZIONAMENTO
+   - Regolazione Climatica (Termodinamica):
+       - Azione: Regolazione Input Energetico (Watt) di Riscaldatori/Raffreddatori.
+       - Azione: Controllo Ventole per manipolare il VPD (Vapor Pressure Deficit), non solo l'umidità relativa.
+       [RISOLTO: P-LOGIC-001 Paradosso Termico]
 
-        → Gestione Illuminazione:
-            ø Azione:
-                - Modifica Spettro (Slider RGB/UV);
-                - Posizionamento Fonte (Coordinate X/Y/Z lampada).
+   - Gestione Illuminazione e Posizionamento:
+       - Azione: Modifica Spettro (RGB / UV / IR).
+       - Azione: Attivazione "Safe Light" (Luce Verde 520nm) per osservazioni notturne.
+       - [P-LOGIC-015] Posizionamento Luce (Asse Z): Regolazione millimetrica altezza lampada.
+         Fisica: Legge dell'Inverso del Quadrato (1/d²). Spostare la lampada di 5cm cambia drasticamente i PPFD.
+         Errore: Troppo vicina = Bruciatura termica/luminosa. Troppo lontana = Eziolamento (Stretch).
 
-        → Input Chimico e Biologico (Dosaggio) [Ref: Assets/Scripts/Controllers/PlantController.cs]:
-            ø Azione:
-                - Iniezione Soluzione Nutriente (NPK);
-                - Iniezione Microbioma (Nanobatteri specifici, es. Decompositori);
-                - Iniezione Acqua Pura (Flush).
-            [⚠️ WARNING: Vedi P-LOGIC-010 Antagonismo Nutrienti]
-            [⚠️ WARNING: Vedi P-LOGIC-013 Deriva pH]
+   - [P-DESIGN-007] Manutenzione Sensori:
+       - Falla: I sensori pH/EC non sono perfetti. "Driftano" (perdono precisione) col tempo.
+       - Azione: "Calibrazione" periodica con liquido buffer standard per ripristinare l'accuratezza.
 
-        → Gestione Rifiuti & Manutenzione [Ref: Assets/Scripts/Controllers/WasteManager.cs]:
-            ø Azione:
-                - Svuotamento Serbatoio Scarti (Waste Tank);
-                - Attivazione Drenaggio Manuale (Emergenza).
+B. CHIMICA E DOSAGGIO
+   - Input Chimico:
+       - Azione: Iniezione Soluzione NPK + Micronutrienti.
+       - Azione: Correzione pH (Up/Down) per contrastare la deriva cationica naturale.
+       - Azione: Flush (Lisciviazione) con acqua pura per lavare via i sali tossici.
 
-        → Pianificazione (End Game):
-            ø Azione:
-                - Creazione di routine controllo manuale non richiesto necessariamente.
+   - [P-LOGIC-014] Gestione Ossigeno (Ipossia):
+       - Fisica: Legge di Henry. La solubilità dell'Ossigeno Disciolto (DO) crolla se T > 25°C.
+       - Azione: Monitorare temperatura acqua. Raffreddare il serbatoio per evitare marciume radicale (Pythium).
 
-    B. Risposte del sistema:
-        → Feedback Immediato (Haptic/Visual):
-            ø Risposta:
-                - Rumore ventole, accensione luci, cambio colore led;
-                - Condensa sul vetro (glassmorphism) [Ref: Assets/Art/Shaders/Shader_Condensation];
-                - Aggiornamento grafici in tempo reale sulla Dashboard.
-            [⚠️ WARNING: Vedi P-DESIGN-006 Cecità da Condensa]
+C. BIOLOGIA E RIPRODUZIONE
+   - Gestione Riproduttiva:
+       - Azione: Impollinazione Manuale ("Shake" o "Brush") necessaria in isolamento.
 
-        → Feedback biologico:
-            ø Risposta:
-                - (Morfogenesi): La pianta orienta le foglie verso la luce (Fototropismo) [Ref: Assets/Scripts/Procedural/LSystemGenerator.cs];
-                - (Turgore): Le foglie si afflosciano se VWC < 10%;
-                - (Cromatica): Le foglie cambiano cromatura (clorosi) se Azoto < Soglia.
+   - [P-LOGIC-016] Monitoraggio Stomi (Shutdown Meccanico):
+       - Fisica: Se il VPD è errato (>1.8 kPa o <0.4 kPa), la pianta chiude gli stomi per protezione.
+       - Conseguenza: Assorbimento CO2 = 0 anche se l'ambiente è ricco di gas. Stallo fotosintetico.
 
-3. Logica Indipendente (Motore logico non visibile):
-    A. Cicli Ambientali Autonomi [Ref: Assets/Scripts/Logic/ClimateLogic.cs]:
-        - Ciclo Idrologico & Drenaggio:
-            → Evaporazione, Saturazione, Condensazione;
-            → Accumulo e Drenaggio: SE Umidità Suolo > Capacità -> Scarto nel Serbatoio;
-            → Trasporto Sali: Il drenaggio sposta l'EC nel serbatoio scarti.
-        - Termodinamica:
-            → Dispersione termica o accumulo calore.
+3. MOTORE DI SIMULAZIONE (LOGICA INVISIBILE)
+-------------------------------------------------------------------------
+A. TERMODINAMICA E GAS [Ref: Assets/Scripts/Logic/Thermodynamics.cs]
+   - Paradosso Termico: Calcolo accumulo calore (Joule) emesso dalle luci vs dispersione passiva vetro.
+   - Asfissia da CO2: La capsula ha un volume d'aria finito. La fotosintesi consuma moli reali.
+   - Dew Point: Il vetro si appanna solo se TempVetro < DewPoint (Formula di Magnus).
 
-    B. Cicli Biologici Autonomi [Ref: Assets/Scripts/Logic/MetabolismLogic.cs]:
-        - Sviluppo procedurale:
-            → Se Energia > CostoCreazioneNodo, il sistema genera una nuova mesh.
-        - Respirazione:
-            → Consumo costante di zuccheri (Metabolismo Basale).
-            [⚠️ WARNING: Vedi P-LOGIC-009 Asfissia CO2]
+B. IDROLOGIA E CHIMICA DEL SUOLO [Ref: Assets/Scripts/Logic/HydroponicsMath.cs]
+   - Matrice di Mulder (Antagonismo): L'assorbimento nutrienti segue la tabella ionica (es. K blocca Mg).
+   - Deriva del pH: L'assorbimento altera il pH (scambio cationico/anionico).
+   - Osmosi: Sali in eccesso (EC alto) disidratano la pianta estraendo acqua dalle radici.
 
-    C. Cicli Microbioma [Ref: Assets/Scripts/Controllers/PlantController.cs]:
-        - Ciclo del Carbonio:
-            → Rilevamento Biomassa Morta e decomposizione tramite Nanobatteri;
-            → Rilascio Nutrienti (Loop chiuso).
+C. BIOLOGIA E METABOLISMO [Ref: Assets/Scripts/BioSystem/Metabolism.cs]
+   - VigorIndex (0-100%): Efficienza metabolica istantanea.
+   - Morfogenesi Energetica: Crescita basata su Costo Energetico (Joules) vs Energia Accumulata.
+   - Conduttanza Stomatica: Moltiplicatore efficienza 0-1 basato su VPD e stress idrico.
 
-    D. Entropia e Imprevisti:
-        - Guasti Hardware (Pompa bloccata).
-        - Patogeni (Muffe se Umidità > 90%).
+4. PROGRESSIONE E FASI (GAME LOOP)
+-------------------------------------------------------------------------
+FASE 0: PREPARAZIONE (DORMIENZA)
+   - Boot sistema e Calibrazione sensori.
+   - Idratazione terreno e Imbibizione seme (No tasto Start).
 
-4. Obiettivi e Progressione (Game Loop):
-    ¶ Fase 1: Survival (Omeostasi).
-    ¶ Fase 2: Ottimizzazione e Fioritura.
-    ¶ Fase 3: Espansione e Automazione.
-        [⚠️ WARNING: Vedi P-LOGIC-012 Senescenza Piante Annuali]
-    - Endgame: Ibridazione.
+FASE 1: VEGETATIVA (OMEOSTASI)
+   - Gestione distanza luce (stretch vs burn).
+   - Prevenzione Ipossia (controllo temperatura acqua).
+   - Bilanciamento nutrienti per crescita esponenziale.
 
-5. Struttura Dati (High Level - Implementation Map):
-    Collegamento diretto tra concetti e file C# in Assets/Scripts/Data/
+FASE 2: RIPRODUTTIVA (FIORITURA)
+   - Gestione pH critico (instabilità chimica).
+   - Impollinazione manuale.
+   - Prevenzione stress luminoso notturno (Ermafroditismo).
 
-    | Entità                | Script C# Corrispondente       | Dati Chiave Gestiti                     |
-    |-----------------------|--------------------------------|-----------------------------------------|
-    | Environment           | EnvironmentData.cs             | temperature, humidity, co2Level, soilEC |
-    | Plant Model           | PlantData.cs                   | vigorIndex, storedEnergy, rootMass      |
-    | DNA Specie            | PlantSpecies.cs (ScriptableObj)| nodeEnergyCost, optimalTemp, growthRule |
-    | Costanti Universali   | GameConfig.cs                  | BASE_METABOLIC_RATE, TICK_INTERVAL      |
-    | Gestione Tempo        | TimeManager.cs                 | Timestamp, DeltaTime                    |
+FASE 3: SENESCENZA (RACCOLTO)
+   - Decadimento genetico programmato.
+   - Obiettivo: Raccolta semi per la Data Bank.
 
-6. Fase Preliminare: Selezione Genomica (Pre-Game Setup):
-    A. Il Catalogo Semi (Database Statico) [Ref: Assets/Resources/SpeciesData/]:
-        - Attore: Utente.
-        - Interfaccia: "La banca dei semi".
-        - Dati Scheda:
-            ø Nome: Helianthus Annuus.
-            ø Difficoltà: Bassa.
-            ø Coefficienti Genetici: Definizione matematica tolleranze.
-            ø Fattore Limitante: Parametro di stress principale.
+5. MAPPATURA DATI (IMPLEMENTATION MAP)
+-------------------------------------------------------------------------
+Collegamento diretto tra concetti scientifici e file C# in Assets/Scripts/Data/
 
-    B. Input e Conferma:
-        - Azione: Selezione Seme.
-        - Backend (Data Injection):
-            → Caricamento Template ScriptableObject;
-            → Istanziazione PlantData;
-            ø Copia Valori:
-                - VigorIndex Iniziale = 100% (Sostituisce Health);
-                - NodeEnergyCost: Sostituisce GrowthRate. Definisce costo energetico per nuovo nodo (es. 50 unità veloce, 500 lenta).
-                - L-System Rules: Regole geometriche.
-
-    C. Configurazione Automatica (Stato Dormienza):
-        - Stato Iniziale: Seme "Dormiente" (Metabolismo = 0).
-        - Loop Iniziale: Tempo illimitato per setup clima.
-        - Trigger: Utente preme "AVVIA GERMINAZIONE".
-        [⚠️ WARNING: Vedi P-LOGIC-011 Incoerenza Tasto Avvio]
+| Entità            | Script C#          | Nuovi Dati Chiave (Scientifici)             |
+|-------------------|--------------------|---------------------------------------------|
+| Atmosphere        | AtmosphereData.cs  | co2Moles, dewPoint, jouleInput, vaporPressure |
+| Plant Model       | PlantState.cs      | vigorIndex, imbibitionLevel, currentRootVolume |
+| DNA Specie        | PlantGenetics.cs   | toleranceCurves (Struct), nodeEnergyCost, senescenceFactor |
+| Chemistry         | SoilData.cs        | interactionMatrix (Mulder), currentPH, dissolvedOxygen (DO) |
+| Physics           | GasLaws.cs         | henryConstant, oxygenSolubilityCurve        |
+| Hardware          | HardwareComponent.cs | reliabilityIndex (MTBF), sensorDrift, timeSinceCalibration |
+| Hardware          | Actuator_Light.cs  | inverseSquareLaw (bool), sourcePPFD         |
+| Biology           | Metabolism.cs      | stomatalConductance (0-1), hypoxiaStress    |

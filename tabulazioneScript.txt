@@ -1,73 +1,64 @@
-DOCUMENTAZIONE STRUTTURA ASSETS (Unity Project Architecture)
-Progetto: BIO-CAPSULE
-Stato: Pre-Alpha
-----------------------------------------------------------------------------------
-
 ROOT (Assets/)
-├── _Scenes/                    # Le scene di gioco
-│   ├── MainMenu.unity          # Selezione Seme / Banca Dati
-│   └── LabSimulation.unity     # La scena principale (Capsula 3D)
+├── _Scenes/
+│   ├── BootSequence.unity        # Simulazione avvio OS e check integrità hardware
+│   ├── LabSimulation.unity       # La capsula principale
+│   └── DataBank.unity            # [Fase 3] Analisi genetica semi raccolti
 │
-├── Art/                        # Tutto ciò che è puramente visivo
-[cite_start]│   ├── Materials/              # Materiali (URP) [cite: 60]
-│   │   ├── Mat_Glass_Capsule   # Vetro con Shader condensa
-│   │   ├── Mat_Soil_Dynamic    # Terreno che cambia colore se bagnato
-│   │   └── Mat_Leaf_SSS        # Foglie con Subsurface Scattering
+├── Art/
+│   ├── Materials/
+│   │   ├── Mat_Glass_DewPoint    # Vetro con Shader condensa basato su Formula Magnus
+│   │   └── Mat_Sensor_Display    # Materiali emissivi per i led di stato hardware
 │   │
-[cite_start]│   ├── Models/                 # Mesh 3D (.fbx / .obj) [cite: 60]
-[cite_start]│   │   ├── Capsule_Rig         # Il modello della stanza/capsula [cite: 61]
-│   │   └── Plant_Primitives/   # Cilindri e Piani base per la generazione procedurale
-│   │
-[cite_start]│   ├── Shaders/                # Shader Graph Files [cite: 61]
-│   │   ├── Shader_Condensation # Logica sfocatura/gocce
-│   │   └── Shader_PlantCell    # Logica clorofilla/stress visivo
-│   │
-[cite_start]│   └── Textures/               # Immagini 2D [cite: 61]
-│       ├── UI_Icons/           # Icone semi, icone avvisi, icone nutrienti
-│       └── PBR_Maps/           # Normal maps, Roughness maps per i materiali
+│   └── Shaders/
+│       ├── Shader_DewPoint       # Calcola DeltaDew (TempVetro - DewPoint)
+│       └── Shader_Spectrum       # Visualizzazione lunghezze d'onda (RGB/UV/IR)
 │
-[cite_start]├── Prefabs/                    # Oggetti di gioco pre-assemblati [cite: 62]
-[cite_start]│   ├── UI/                     # Widget dell'interfaccia [cite: 62]
-│   │   ├── Widget_Graph        # Grafico andamento dati
-│   │   └── Panel_Control       # Slider e manopole
+├── Resources/
+│   ├── SpeciesGenetics/          # [ScriptableObjects] Profili genetici (Tolerance Curves)
+│   │   ├── Helianthus_Alpha.asset
+│   │   └── ...
 │   │
-│   └── Simulation/
-│       ├── Capsula_System      # L'intero macchinario (Luci + Ventole + Vetro)
-│       └── Plant_Container     # L'oggetto radice che conterrà la pianta procedurale
+│   └── HardwareSpecs/            # Dati tecnici dei componenti (MTBF, Watt, Efficienza)
+│       ├── Light_LED_FullSpec.asset
+│       └── Pump_Peristaltic.asset
 │
-[cite_start]├── Resources/                  # Cartelle speciali per caricamento dinamico (LoadAsync) [cite: 63]
-│   └── SpeciesData/            # Qui vivono gli ScriptableObjects (I "Semi")
-│       ├── Girasole.asset
-│       ├── Felce.asset
-│       └── ...
-│
-[cite_start]└── Scripts/                    # Il Codice Sorgente (C#) [cite: 64]
+└── Scripts/
     │
-    [cite_start]├── Core/                   # I Manager Globali (Singleton) [cite: 64]
-    │   ├── GameManager.cs      # Gestione stati (Start, Pause, Quit)
-    │   ├── TimeManager.cs      # Gestione Tempo Reale e Offline Catch-up
-    │   └── SaveSystem.cs       # Gestione Serializzazione JSON
+    ├── Core/                     # Gestione del "Tempo e dello Stato"
+    │   ├── GameManager.cs        # Macchina a stati (Dormant -> Vegetative -> Senescent)
+    │   ├── TimeManager.cs        # Gestione Tick Fisici (indipendenti dal FrameRate)
+    │   ├── EntropyManager.cs     # [NUOVO] Calcola l'usura globale e i guasti (MTBF)
+    │   └── SaveSystem.cs         # Serializzazione profonda (include matrici chimiche)
     │
-    [cite_start]├── Data/                   # Classi Dati Pure (No MonoBehaviour) [cite: 65]
-    │   ├── EnvironmentData.cs  # [Serializable] Dati Capsula (Temp, NPK, pH)
-    │   ├── PlantData.cs        # [Serializable] Dati Pianta (Vigor, Energy, Nodes)
-    │   ├── PlantSpecies.cs     # [ScriptableObject] Template statico della specie
-    │   └── GameConfig.cs       # [Static] Costanti universali e formule bilanciamento
+    ├── Data/                     # Strutture Dati (No Logic)
+    │   ├── AtmosphereData.cs     # [Ex Environment] Moli CO2, Joules, Pressione Vapore
+    │   ├── SoilData.cs           # Matrice Nutrienti, pH, EC, Dissolved Oxygen (DO)
+    │   ├── PlantGenetics.cs      # [Ex Species] Curve di tolleranza (Gaussiane)
+    │   ├── PlantState.cs         # [Ex PlantData] VigorIndex, StoredJoules, Imbibition
+    │   └── FluidChemistry.cs     # Definizioni molecolari (N, P, K, H2O, pH)
     │
-    [cite_start]├── Controllers/            # Logica Fisica (Interazione col mondo) [cite: 66]
-    [cite_start]│   ├── EnvironmentCtrl.cs  # Applica i dati ai modelli (es. accende luce, muove ventole) [cite: 67]
-    │   ├── PlantController.cs  # Cervello della pianta (gestisce input/output risorse)
-    │   └── WasteManager.cs     # Gestione Serbatoio Scarti e Flush [P-LOGIC-002]
+    ├── Hardware/                 # [NUOVO] Interfaccia Utente-Macchina
+    │   ├── HardwareComponent.cs  # Logica Usura e Metodo Calibrate() [P-DESIGN-007]
+    │   ├── Actuator_Light.cs     # Calcolo PPFD con Legge Inverso Quadrato [P-LOGIC-015]
+    │   ├── Actuator_HVAC.cs      # Riscaldatori/Raffreddatori e Ventole (Controllo VPD)
+    │   └── Actuator_Pump.cs      # Iniezione soluzioni e Flush sistema
     │
-    [cite_start]├── Logic/                  # Motore di Simulazione (Matematica pura) [cite: 68]
-    │   ├── MetabolismLogic.cs  # Calcoli Fotosintesi e Respirazione
-    [cite_start]│   ├── ClimateLogic.cs     # Calcoli Termodinamica e VPD [cite: 68]
-    │   └── ChemistryLogic.cs   # Calcoli pH e Antagonismo Nutrienti [P-LOGIC-013]
+    ├── Logic/                    # Motore Matematico (Invisibile)
+    │   ├── Thermodynamics.cs     # [Ex Climate] Calcola Q (Joule), DeltaT e DewPoint
+    │   ├── GasLaws.cs            # Legge di Henry (DO vs Temp) [P-LOGIC-014]
+    │   ├── HydroponicsMath.cs    # [Ex Chemistry] Matrice di Mulder, pH Drift e Osmosi
+    │   └── MicrobiomeSim.cs      # Ciclo dell'Azoto (Batteri: Biomassa -> NO3)
     │
-    [cite_start]├── Procedural/             # Generazione Grafica (L-Systems) [cite: 69]
-    │   ├── LSystemGenerator.cs # Traduce le stringhe in geometria
-    │   └── MeshBuilder.cs      # Crea i poligoni in runtime
+    ├── BioSystem/                # [Ex Controllers] Logica Biologica
+    │   ├── Metabolism.cs         # Conduttanza Stomatica (VPD -> CO2 Intake) [P-LOGIC-016]
+    │   ├── Morphogenesis.cs      # [Ex PlantController] Spende Joules per creare Nodi
+    │   └── Reproduction.cs       # Gestione Polline, Ermafroditismo e Genetica Semi
     │
-    [cite_start]└── UI/                     # Interfaccia Utente [cite: 69]
-        ├── DashboardView.cs    # Aggiorna i testi e i grafici a schermo
-        └── InteractionView.cs  # Gestisce i click su slider e bottoni
+    ├── Procedural/               # Visualizzazione
+    │   └── LSystemOrganics.cs    # Mesh che reagisce allo stress idrico (avvizzimento)
+    │
+    └── UI/                       # Dashboard Operatore
+        ├── Monitor_VPD.cs        # Grafico psicrometrico (Temp vs Umidità)
+        ├── Panel_Chemistry.cs    # Slider dosaggio NPK e monitor pH/EC
+        ├── Panel_Calibration.cs  # [NUOVO] Minigame/Interazione calibrazione sonde
+        └── SpectrumAnalyzer.cs   # Visualizza le lunghezze d'onda attive

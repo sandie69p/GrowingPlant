@@ -1,33 +1,191 @@
-RIF: [ID-PROBLEMA] [UTENTE PRENOTAZIONE]
-Logica: Spiegazione discorsiva o pseudo-codice.
-Note Tecniche: Variabili chiave, formule matematiche da usare.
+[LEGEND]
+RIF: [ID-PROBLEMA] [UTENTE] [STATO] - Titolo
+Logica: Spiegazione scientifica.
+Note Tecniche: Variabili e formule.
 ---------------------------------------------------------------------------
+
+RIF: [P-DESIGN-001] [System] [RISOLTO] - Concetto di "Salute" (HP) Inadatto
+    Logica:
+        → Sostituito con `VigorIndex` (0-100). Rappresenta l'efficienza metabolica istantanea, non la vita totale.
+        → Se Vigor < 20%, la fotosintesi si arresta. Se Vigor = 0 per > 24h, morte per necrosi.
+    Note Tecniche:
+        - Variabile: `public float vigorIndex;` in PlantData.cs.
 
 RIF: [P-DESIGN-002] [sandie69] [RISOLTO] - Conflitto GrowthRate vs Tempo Reale
     Logica (Modello Energetico):
-        → Invece di usare un moltiplicatore di velocità astratto (GrowthRate), si adotta il "Costo Energetico per Nodo" (NodeEnergyCost).
-        → Il tempo scorre uguale per tutte le piante (Real Time). [cite_start]La differenza di velocità è data dal costo energetico per creare una nuova parte[cite: 146].
-    Algoritmo:
-        1. La Fotosintesi produce Energia (Zuccheri) in StoredEnergy.
-        2. [cite_start]Ogni specie ha 'EnergyCostPerNode' (es. 50 unità veloce, 500 lenta)[cite: 150].
-        3. [cite_start]CHECK CRESCITA: SE (StoredEnergy > EnergyCostPerNode) -> Sottrai Costo -> Genera Nodo[cite: 152].
+        → Sostituito "velocità" con "Costo Energetico".
+        → Algoritmo: `StoredEnergy` si accumula (Joules). Ogni organo (foglia/nodo) ha un prezzo (`nodeEnergyCost`).
+        → La crescita avviene solo quando il "conto in banca" energetico copre la spesa.
     Note Tecniche:
-    - Variabile in PlantSpecies: `public float nodeEnergyCost;`
-    - Variabile in PlantData: `public float storedEnergy;`
+        - `if (storedEnergy > species.nodeEnergyCost) { BuildNode(); }`
 
-RIF: [P-LOGIC-004] [sandie69] [RISOLTO] - Assenza del Microbioma
-    Logica (Gestione Organica):
-        [cite_start]→ Decomposizione tramite nanobatteri specializzati "buoni" (Microbioma Sintetico)[cite: 154].
-        [cite_start]→ Quando una foglia muore, i nanobatteri la decompongono e rilasciano nutrienti nel terreno, chiudendo il ciclo[cite: 156].
+RIF: [P-DESIGN-003] [System] [RISOLTO] - Definizione "Tratti Speciali"
+    Logica (Coefficienti Matematici):
+        → Abolizione tratti arcade. Introduzione "Curve di Tolleranza".
+        → Ogni specie ha una curva a campana (Gaussian) per Temp, pH, e EC.
+        → `StressFactor` = distanza dal picco ottimale della curva.
     Note Tecniche:
-    - Nuova Entità: `MicrobiomeManager`.
-    - [cite_start]Variabili: `DeadBiomass`, `DecompositionRate`[cite: 158].
+        - Struct `ToleranceCurve { float min, optimal, max; }` in PlantSpecies.cs.
+        - Formula: `efficiency = 1 - pow((current - optimal) / (max - min), 2);`
 
-RIF: [P-LOGIC-002] & [P-LOGIC-008] [sandie69] [RISOLTO] - Saturazione Idrica e Salina
-    Logica (Gestione Idraulica e Flush):
-        [cite_start]→ Sistema a "Doppio Fondo" con serbatoio scarti[cite: 159].
-        [cite_start]→ Problema Acqua: SE Umidità Suolo > Capacità Massima -> Drena nel Serbatoio Scarti[cite: 161].
-        [cite_start]→ Problema Sali: Flush (irrigazione eccessiva) scioglie i sali e li spinge nel serbatoio, abbassando l'EC del terreno[cite: 163].
+RIF: [P-DESIGN-004] [System] [RISOLTO] - Disallineamento Iniziale (Hardcore Mode)
+    Logica (Stato di Dormienza):
+        → Il seme ha una riserva finita (`EndospermEnergy`).
+        → Non risente del clima esterno finché il tegumento non viene rotto (Germinazione).
+        → La rottura avviene solo se: (Temp > Min) AND (Water > Min) per X ore consecutive.
     Note Tecniche:
-    - Variabili: `WasteTankLevel`, `SoilEC`.
-    - [cite_start]Logica: `IF (SoilVWC > MaxCapacity) THEN MoveExcessTo(WasteTank)`[cite: 165].
+        - `enum PlantStage { Seed_Dormant, Germinating, Vegetative, Flowering, Senescent }`
+        - Variabile: `imbibitionLevel` (assorbimento acqua pre-germinazione).
+
+RIF: [P-DESIGN-005] [System] [RISOLTO] - Ingiocabilità Stagioni Tempo Reale
+    Logica (Time Dilation):
+        → Simulazione sganciata dal rendering.
+        → `SimulationTick` separato da `Update`. Possibilità di Warp (Salto Temporale) calcolando la chimica in background.
+    Note Tecniche:
+        - TimeManager gestisce `TicksPerSecond`. Calcolo integrale per i periodi offline.
+
+RIF: [P-DESIGN-006] [System] [RISOLTO] - Cecità da Condensa
+    Logica (Punto di Rugiada - Dew Point):
+        → Calcolo fisico del Dew Point basato su Temp e Umidità Relativa (RH).
+        → `DeltaDew` = TempVetro - DewPoint.
+        → Se `DeltaDew` < 0, Alpha del materiale vetro aumenta (si appanna).
+        → Azione Utente: Ventole (abbassano RH) o Riscaldatori (alzano TempVetro) per disappannare.
+    Note Tecniche:
+        - Shader Graph con input `_DewPointDelta`.
+        - Formula Magnus per DewPoint approximation.
+
+RIF: [P-LOGIC-001] [System] [RISOLTO] - Paradosso Termico
+    Logica (Termodinamica):
+        → Calcolo in Joule (Q).
+        → `InputQ`: Calore emesso dalle luci (Watts * EfficienzaTermica * DeltaTime).
+        → `LossQ`: Dispersione attraverso il vetro (U-Value * Superficie * (TempInterna - TempEsterna)).
+        → Nuova Temp = Vecchia Temp + (NetQ / MassaAria * CaloreSpecificoAria).
+    Note Tecniche:
+        - Variabili in ClimateLogic: `thermalMass`, `insulationFactor`.
+
+RIF: [P-LOGIC-002] & [P-LOGIC-008] [sandie69] [RISOLTO] - Saturazione e Sali
+    Logica (Idraulica e Osmosi):
+        → Terreno modellato come spugna con `MaxWaterHold`.
+        → Eccesso d'acqua = `GravityDrainage` verso `WasteTank`.
+        → L'acqua che esce trasporta i sali (`Leaching`).
+    Note Tecniche:
+        - `EnvironmentData.soilEC` diminuisce proporzionalmente all'acqua drenata.
+
+RIF: [P-LOGIC-003] [sandie69] [RISOLTO] - Root Bound
+    Logica (Volume Fisico):
+        → `CurrentRootVol` calcolato in cm³.
+        → `BindingFactor` = Current / MaxContainer.
+        → Se BindingFactor > 0.9, lo stress ormonale riduce l'assorbimento nutrienti del 50%.
+    Note Tecniche:
+        - Blocco procedurale: `canGrowRoots = bindingFactor < 1.0;`
+
+RIF: [P-LOGIC-004] [sandie69] [RISOLTO] - Microbioma
+    Logica (Ciclo Carbonio):
+        → Pool "Biomassa Morta".
+        → I batteri convertono Biomassa -> Ammonio (NH4+) -> Nitrati (NO3-).
+        → Velocità conversione dipende da Temp e Umidità.
+    Note Tecniche:
+        - Classe `MicrobiomeColony` con tassi di conversione metabolica.
+
+RIF: [P-LOGIC-005] [System] [RISOLTO] - Riproduzione in Isolamento
+    Logica (Impollinazione):
+        → Richiede fase `Flowering`.
+        → Generazione `PollenViability` (basata sulla salute pianta).
+        → Azione "Shake" (scuotere dispositivo o ventole al max) o "Brush" (click manuale) per spostare polline.
+    Note Tecniche:
+        - Evento `OnPollinationAttempt`. Success rate % = VigorIndex.
+
+RIF: [P-LOGIC-006] [sandie69] [RISOLTO] - Paradosso Notturno
+    Logica (Fotoperiodo):
+        → Rilevamento spettro luce incidente.
+        → Se (Spettro != 520nm [Verde]) AND (Intensità > 0) AND (Fase == Notte): Trigger `HermaphroditismRisk`.
+    Note Tecniche:
+        - Accumulatore `lightStressHours`. Se > soglia, la pianta produce semi "errati" o fiori maschi.
+
+RIF: [P-LOGIC-007] [System] [RISOLTO] - Entropia (Guasti)
+    Logica (MTBF - Mean Time Between Failures):
+        → Ogni componente hardware (Luci, Pompe, Ventole) ha una "Salute Meccanica".
+        → Usura = TempoUtilizzo * StressTermico.
+        → Se SaluteComponente < 0 -> Guasto (es. Luce spenta, Pompa bloccata ON allaga tutto).
+    Note Tecniche:
+        - Classe `HardwareComponent` con metodo `Degrade()`.
+
+RIF: [P-LOGIC-009] [System] [RISOLTO] - Asfissia CO2
+    Logica (Scambio Gassoso):
+        → La capsula ha un volume d'aria definito (Litri).
+        → `Co2Moles` = (PPM * VolumeAria) / CostanteGas.
+        → Fotosintesi: Consuma X moli di CO2 per Joule di energia prodotta.
+        → Respirazione (Notte): Rilascia Y moli di CO2.
+        → Se PPM < 200, Fotosintesi = 0 (Stallo metabolico).
+    Note Tecniche:
+        - `MetabolismLogic.cs` deve sottrarre CO2 dall'EnvironmentData ad ogni ciclo.
+
+RIF: [P-LOGIC-010] [System] [RISOLTO] - Antagonismo Nutrienti (Mulder)
+    Logica (Matrice di Interazione Ionica):
+        → Implementazione Tabella di Mulder.
+        → Esempio: Eccesso K (Potassio) applica malus -0.8 all'assorbimento di Mg (Magnesio).
+        → Eccesso Ca (Calcio) blocca Fe (Ferro).
+        → L'assorbimento reale non è quanto c'è nel terreno, ma quanto è "biodisponibile" dopo gli antagonismi.
+    Note Tecniche:
+        - Matrice 2D `float[,] interactionMatrix`.
+        - `uptake_Mg = soil_Mg * (1.0 - (soil_K * k_antagonism_factor));`
+
+RIF: [P-LOGIC-011] [System] [RISOLTO] - Incoerenza Tasto Avvio
+    Logica (Imbibizione):
+        → Rimosso tasto "Start Germination".
+        → Il sistema inizia in pausa. L'utente deve idratare il terreno.
+        → Il seme assorbe acqua passivamente (`Imbibition`).
+        → Quando `WaterAbsorbed` > 100% massa seme -> Trigger automatico `Sprout`.
+    Note Tecniche:
+        - Check in `PlantController`: `if (state == Dormant && soilMoisture > 40) Imbibe();`
+
+RIF: [P-LOGIC-012] [System] [RISOLTO] - Senescenza Programmata
+    Logica (Invecchiamento Cellulare):
+        → Piante annuali hanno un "Orologio Genetico".
+        → Dopo la fioritura, efficienza fotosintetica cala del X% al giorno (`SenescenceFactor`).
+        → L'obiettivo finale non è tenere la pianta viva per sempre, ma raccogliere semi/frutti prima della morte inevitabile.
+    Note Tecniche:
+        - Curva di decadimento in `PlantSpecies`.
+
+RIF: [P-LOGIC-013] [System] [RISOLTO] - Deriva pH
+    Logica (Scambio Cationico):
+        → Le radici rilasciano ioni H+ (acidi) quando assorbono cationi (K+, Ca++, Mg++).
+        → Rilasciano OH- (basici) quando assorbono anioni (NO3-).
+        → Bilancio di carica: Se la pianta mangia più Azoto (Nitrate), il pH sale. Se mangia più Ammonio, il pH scende.
+    Note Tecniche:
+        - `ChemistryLogic` calcola il delta pH basato sul tipo di nutriente assorbito nel tick precedente.
+
+RIF: [P-LOGIC-014] [System] [RISOLTO] - Legge di Henry (Ipossia Radicale)
+    Logica (Ossigeno Disciolto - DO):
+        → La solubilità dell'O2 in acqua è inversamente proporzionale alla temperatura.
+        → Se TempAcqua > 25°C, il DO scende sotto 6mg/L (Ipossia).
+        → Le radici soffocano e marciscono (Pythium Risk) anche se irrigate.
+    Note Tecniche:
+        - In `GasLaws.cs`: Formula `DO = 14.652 - 0.41*T + 0.00799*T^2 - 0.000077*T^3`.
+        - In `PlantState.cs`: Variabile `rootRotHealth`.
+
+RIF: [P-LOGIC-015] [System] [RISOLTO] - Legge dell'Inverso del Quadrato (Luce)
+    Logica (Fisica Ottica):
+        → La luce non è un valore fisso. L'intensità (PPFD) decade con il quadrato della distanza.
+        → `Intensity = SourcePower / Distance^2`.
+        → Il giocatore deve regolare l'asse Z della lampada al millimetro: troppo vicina brucia, troppo lontana stira.
+    Note Tecniche:
+        - In `Actuator_Light.cs`: Raycast per distanza superficie fogliare.
+        - Calcolo PPFD reale in µmol/m²/s.
+
+RIF: [P-LOGIC-016] [System] [RISOLTO] - Conduttanza Stomatica (Shutdown)
+    Logica (Fisiologia Vegetale):
+        → Il VPD controlla l'apertura meccanica degli stomi.
+        → Se VPD > 1.8 kPa (Aria secca), la pianta chiude gli stomi per proteggersi.
+        → Risultato: Conduttanza = 0 -> Assorbimento CO2 = 0 -> Fotosintesi = 0 (anche con luce piena).
+    Note Tecniche:
+        - In `Metabolism.cs`: Moltiplicatore `stomatalConductance` (0.0 a 1.0) applicato al calcolo energetico.
+
+RIF: [P-DESIGN-007] [System] [RISOLTO] - Deriva dei Sensori
+    Logica (Inaffidabilità Hardware):
+        → I sensori pH/EC non sono perfetti. Hanno un valore `Accuracy`.
+        → L'Accuracy decade col tempo (`Drift`). Dopo 48h, un pH 6.0 reale potrebbe essere letto come 6.4.
+        → Azione Utente: "Calibrazione" periodica con liquidi buffer per resettare l'Accuracy.
+    Note Tecniche:
+        - In `HardwareComponent.cs`: `currentDriftOffset`.
+        - Metodo `CalibrateSensor()`.

@@ -1,80 +1,26 @@
 [ID] [PRIORITÀ] [STATO] [NOME UTENTE] - Titolo del Problema
-Descrizione: Dettagli su cosa manca o cosa non funziona.
-Target File: Lo script o l'asset responsabile nella struttura di progetto.
 ----------------------------------------------------------------------------------
 
-[P-DESIGN-001] [ALTA] [APERTO] - Concetto di "Salute" (HP) Inadatto
-    - Descrizione: Le piante non hanno "punti vita". [cite_start]Sostituire con VigorIndex[cite: 72].
-    - Target File: Assets/Scripts/Data/PlantData.cs
-
-[P-DESIGN-002] [ALTA] [CHIUSO] [sandie69] - Conflitto GrowthRate vs Tempo Reale
-    - [cite_start]Descrizione: Sostituire velocità con Costo Energetico[cite: 75].
-    - Target File: Assets/Scripts/Data/PlantSpecies.cs (Variabile NodeEnergyCost)
-
-[P-DESIGN-003] [MEDIA] [APERTO] - Definizione "Tratti Speciali" e "Requisiti"
-    - Descrizione: Termini troppo arcade. [cite_start]Servono coefficienti matematici[cite: 78].
-    - Target File: Assets/Scripts/Data/PlantSpecies.cs
-
-[P-DESIGN-004] [ALTA] [APERTO] - Disallineamento Iniziale (Hardcore Mode)
-    - Descrizione: Il seme muore subito se la stanza è fredda. [cite_start]Serve stato "Dormiente"[cite: 82].
-    - Target File: Assets/Scripts/Core/GameManager.cs (Logica StartGame)
-
-[P-DESIGN-005] [ALTA] [APERTO] - Ingiocabilità delle Stagioni in Tempo Reale
-    - Descrizione: Aspettare 60 giorni per un fiore è noioso. [cite_start]Conflitto RealTime vs Gameplay[cite: 85].
-    - Target File: Assets/Scripts/Core/TimeManager.cs (Configurazione TimeMultiplier)
-
-[P-DESIGN-006] [BASSA] [APERTO] - Cecità da Condensa (Conflitto Fisica vs UX)
-    - Descrizione: Il vetro si appanna troppo. [cite_start]Serve meccanica tergicristallo/ventola[cite: 90].
-    - Target File: Assets/Art/Shaders/Shader_Condensation (Parametri trasparenza)
-
-[P-LOGIC-001] [ALTA] [APERTO] - Paradosso Termico del Sistema Chiuso
-    - Descrizione: Manca dissipazione attiva. [cite_start]La temperatura sale all'infinito[cite: 93].
-    - Target File: Assets/Scripts/Logic/ClimateLogic.cs (Calcolo DeltaTemp)
-
+[P-DESIGN-001] [ALTA] [RISOLTO] - Concetto di "Salute" (HP) Inadatto
+[P-DESIGN-002] [ALTA] [RISOLTO] [sandie69] - Conflitto GrowthRate vs Tempo Reale
+[P-DESIGN-003] [MEDIA] [RISOLTO] - Definizione "Tratti Speciali" e "Requisiti"
+[P-DESIGN-004] [ALTA] [RISOLTO] - Disallineamento Iniziale (Hardcore Mode)
+[P-DESIGN-005] [ALTA] [RISOLTO] - Ingiocabilità delle Stagioni in Tempo Reale
+[P-DESIGN-006] [BASSA] [RISOLTO] - Cecità da Condensa (Conflitto Fisica vs UX)
+[P-LOGIC-001] [ALTA] [RISOLTO] - Paradosso Termico del Sistema Chiuso
 [P-LOGIC-002] [ALTA] [RISOLTO] [sandie69] - Accumulo di Massa e Saturazione
-    - [cite_start]Descrizione: L'acqua in eccesso deve drenare in un serbatoio[cite: 97].
-    - Target File: Assets/Scripts/Controllers/WasteManager.cs
-
-[P-LOGIC-003] [ALTA] [APERTO] - Il "Root Bound" (Saturazione Radicale)
-    - Descrizione: Le radici crescono all'infinito. [cite_start]Serve limite fisico vaso[cite: 100].
-    - Target File: Assets/Scripts/Data/PlantData.cs (Variabile MaxRootVolume)
-
+[P-LOGIC-003] [ALTA] [RISOLTO] [sandie69] - Il "Root Bound" (Saturazione Radicale)
 [P-LOGIC-004] [ALTA] [RISOLTO] [sandie69] - Assenza del Microbioma
-    - Descrizione: Le foglie morte non si decompongono. [cite_start]Serve MicrobiomaManager[cite: 104].
-    - Target File: Assets/Scripts/Controllers/PlantController.cs (Gestione Biomassa Morta)
-
-[P-LOGIC-005] [MEDIA] [APERTO] - Riproduzione in Isolamento
-    - [cite_start]Descrizione: Manca impollinazione (Manuale o Robotica)[cite: 108].
-    - Target File: Assets/Scripts/UI/InteractionView.cs (Azione "Impollina")
-
-[P-LOGIC-006] [ALTA] [APERTO] - Il Paradosso dell'Osservazione Notturna
-    - [cite_start]Descrizione: Guardare la pianta di notte interrompe il fotoperiodo[cite: 112].
-    - Target File: Assets/Scripts/Controllers/EnvironmentCtrl.cs (Spettro non visibile/IR)
-
-[P-LOGIC-007] [BASSA] [APERTO] - La Noia dell'Automazione (EndGame)
-    - Descrizione: Il gioco perfetto si gioca da solo. [cite_start]Manca entropia[cite: 116].
-    - Target File: Assets/Scripts/Core/GameManager.cs (Eventi Casuali)
-
+[P-LOGIC-005] [MEDIA] [RISOLTO] - Riproduzione in Isolamento
+[P-LOGIC-006] [ALTA] [RISOLTO] [sandie69] - Il Paradosso dell'Osservazione Notturna
+[P-LOGIC-007] [BASSA] [RISOLTO] - La Noia dell'Automazione (Entropia)
 [P-LOGIC-008] [ALTA] [RISOLTO] [sandie69] - Salinizzazione del Terreno
-    - Descrizione: Accumulo sali tossici. [cite_start]Serve meccanica Flush[cite: 119].
-    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Calcolo EC Accumulo)
-
-[P-LOGIC-009] [ALTA] [APERTO] - Asfissia da CO2
-    - [cite_start]Descrizione: La pianta consuma tutta la CO2 in un sistema sigillato[cite: 122].
-    - Target File: Assets/Scripts/Logic/MetabolismLogic.cs (Consumo CO2 per ora)
-
-[P-LOGIC-010] [MEDIA] [APERTO] - Antagonismo dei Nutrienti
-    - Descrizione: Troppo Potassio blocca il Magnesio. [cite_start]Serve logica chimica complessa[cite: 126].
-    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Legge di Mulder)
-
-[P-LOGIC-011] [BASSA] [APERTO] - Incoerenza Biologica del "Tasto Avvio"
-    - Descrizione: Il seme aspetta il click per germinare. [cite_start]È irrealistico[cite: 131].
-    - Target File: Assets/Scripts/Core/GameManager.cs
-
-[P-LOGIC-012] [ALTA] [APERTO] - Senescenza Programmata
-    - Descrizione: Le piante annuali devono morire dopo il fiore. [cite_start]Rompe la Fase 3[cite: 135].
-    - Target File: Assets/Scripts/Data/PlantSpecies.cs (Variabile IsPerennial)
-
-[P-LOGIC-013] [MEDIA] [APERTO] - Deriva del pH e Blocco dei Nutrienti
-    - Descrizione: Il pH cambia e blocca l'assorbimento. [cite_start]Serve gestione pH Up/Down[cite: 141].
-    - Target File: Assets/Scripts/Logic/ChemistryLogic.cs (Gestione Acidità)
+[P-LOGIC-009] [ALTA] [RISOLTO] - Asfissia da CO2
+[P-LOGIC-010] [MEDIA] [RISOLTO] - Antagonismo dei Nutrienti
+[P-LOGIC-011] [BASSA] [RISOLTO] - Incoerenza Biologica del "Tasto Avvio"
+[P-LOGIC-012] [ALTA] [RISOLTO] - Senescenza Programmata
+[P-LOGIC-013] [MEDIA] [RISOLTO] - Deriva del pH e Blocco dei Nutrienti
+[P-LOGIC-014] [ALTA] [RISOLTO] - Legge di Henry (Ipossia Radicale Termica)
+[P-LOGIC-015] [ALTA] [RISOLTO] - Legge dell'Inverso del Quadrato (Luce)
+[P-LOGIC-016] [MEDIA] [RISOLTO] - Conduttanza Stomatica (Shutdown Meccanico)
+[P-DESIGN-007] [ALTA] [RISOLTO] - Deriva dei Sensori (The Unreliable Narrator)
